@@ -1,2 +1,2 @@
 # coding-theory
-Kodavimo teorija 7 semestras
+Klaidas taisantys kodai 7 semestras
