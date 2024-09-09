@@ -1,16 +1,16 @@
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UserInterface {
     private final EncoderDecoder encoderDecoder = new EncoderDecoder();
     private final Random random = new Random();
     private final Scanner scanner = new Scanner(System.in);
+
     private int[][] G;
     private int[] m;
     private int n;
     private int k;
+    private int PROBABILITY = 10; // % error probability
 
     public UserInterface() {
         prompt();
@@ -58,12 +58,28 @@ public class UserInterface {
     }
 
     private void sendVector() {
+        System.out.printf("Sending vector %s%n", vectorAsString(m));
         int[] c = encoderDecoder.encode(G, m);
         System.out.println("Encoded vector: " + vectorAsString(c));
-        int[] r = encoderDecoder.send(c);
+        int[] r = encoderDecoder.error(c, PROBABILITY);
         System.out.println("Received vector with errors: " + vectorAsString(r));
         int[][] H = encoderDecoder.generateParityCheckMatrix(G, n, k);
         System.out.println("Parity check matrix: \n" + matrixAsString(H));
+
+        List<CosetLeaderInfo> cosetLeaders = encoderDecoder.findAllCosetLeaders(H)
+                .stream()
+                .sorted(Comparator.comparingInt(CosetLeaderInfo::weight))
+                .toList();
+
+        System.out.printf("%-12s | %-8s | %s%n", "Coset Leader", "Syndrome", "Weight of Syndrome");
+        System.out.println("---------------------------------------------");
+        cosetLeaders.forEach(info -> System.out.printf("%-12s | %-8s | %d%n",
+                vectorAsString(info.cosetLeader()),
+                vectorAsString(info.syndrome()),
+                info.weight()));
+
+        int[] d = encoderDecoder.decode(H, r, cosetLeaders);
+        System.out.println("Decoded vector: " + vectorAsString(d));
     }
 
     private void generateMatrix() {
