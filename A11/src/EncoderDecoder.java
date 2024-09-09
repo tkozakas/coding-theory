@@ -56,22 +56,27 @@ public class EncoderDecoder {
             (1, 1, | 0, 0, 1)
             <A^T-> | <-I->
         */
+        if (n == k) {
+            System.out.println("Parity check matrix H cannot be generated when n equals k. Returning an empty matrix.");
+            return new int[0][n]; // Return a matrix with 0 rows and n columns
+        }
 
-        // extract the submatrix A from G
-        int[][] A = new int[k][n - k]; // (k eilučių, n - k stulpelių)
-        IntStream.range(0, k)
-                .forEach(i -> System.arraycopy(G[i], k, A[i], 0, n - k));
+        // Extract the submatrix A from G
+        int[][] A = new int[k][n - k]; // A has dimensions (k rows, n - k columns)
+        for (int i = 0; i < k; i++) {
+            System.arraycopy(G[i], k, A[i], 0, n - k); // Copy the submatrix A from G
+        }
 
-        // transpose the submatrix A to get A^T
-        int[][] At = new int[n - k][k]; // (n - k eilučių, k stulpelių)
+        // Transpose the submatrix A to get A^T
+        int[][] At = new int[n - k][k]; // A^T has dimensions (n - k rows, k columns)
         for (int i = 0; i < k; i++) {
             for (int j = 0; j < n - k; j++) {
                 At[j][i] = A[i][j];
             }
         }
 
-        // construct the parity check matrix H = (A^T | I)
-        int[][] H = new int[n - k][n]; // (n - k eilučių, k stulpelių)
+        // Construct the parity check matrix H = (A^T | I)
+        int[][] H = new int[n - k][n]; // H has dimensions (n - k rows, n columns)
         for (int i = 0; i < n - k; i++) {
             System.arraycopy(At[i], 0, H[i], 0, k);
             for (int j = k; j < n; j++) {
@@ -79,17 +84,22 @@ public class EncoderDecoder {
             }
         }
 
+        if (H[0].length == 0) {
+            throw new IllegalArgumentException("Parity check matrix H is not properly generated.");
+        }
+
         return H;
     }
 
     public List<CosetLeaderInfo> findAllCosetLeaders(int[][] H) {
+        if (H == null || H.length == 0 || H[0].length == 0) {
+            throw new IllegalArgumentException("Matrix H is not properly initialized.");
+        }
+
         int rows = H.length;
         int cols = H[0].length;
-
-        // Using a Map to store coset leaders based on syndrome as a key (string representation)
         Map<String, CosetLeaderInfo> cosetLeadersMap = new HashMap<>();
 
-        // Iterate through all possible error vectors of length cols (n)
         for (int i = 0; i < (1 << cols); i++) { // 2^n possible vectors
             int[] errorVector = new int[cols];
             int currentWeight = 0;

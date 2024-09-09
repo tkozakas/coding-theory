@@ -25,26 +25,22 @@ public class UserInterface {
 
            Vartotojas turi tureti galimybe pačiam įvesti generuojančią matricą, arba leisti programai ją sugeneruoti su k ir n parametrais
          */
+        menu();
+        scanner.nextLine();
         System.out.println("Enter the vector to encode:");
         m = scanner.nextLine().chars()
                 .filter(Character::isDigit)
                 .map(c -> c - '0')
                 .toArray();
 
-        menu();
+        sendVector();
     }
 
     private void menu() {
-        System.out.print(
-                "Vector: " + vectorAsString(m) + "\n" +
-                        "Generating matrix: \n" +
-                        (G == null ?
-                                "Matrix is not generated yet.\n" :
-                                matrixAsString(G)) + """
+        System.out.print("""
                         Choose an option:
                         1. Enter generating matrix
                         2. Generate generating matrix
-                        3. Send vector
                         Choice:\s"""
         );
         int choice = scanner.nextInt();
@@ -52,13 +48,13 @@ public class UserInterface {
         switch (choice) {
             case 1 -> enterMatrix();
             case 2 -> generateMatrix();
-            case 3 -> sendVector();
-            case 0 -> System.exit(0);
         }
     }
 
     private void sendVector() {
-        System.out.printf("Sending vector %s%n", vectorAsString(m));
+        System.out.println("Error probability (%): " + PROBABILITY);
+        System.out.print("Matrix G: \n" + matrixAsString(G));
+        System.out.printf("Sent vector %s%n", vectorAsString(m));
         int[] c = encoderDecoder.encode(G, m);
         System.out.println("Encoded vector: " + vectorAsString(c));
         int[] r = encoderDecoder.error(c, PROBABILITY);
@@ -113,7 +109,6 @@ public class UserInterface {
                 G[i][j] = random.nextInt(2);
             }
         }
-        menu();
     }
 
     private void enterMatrix() {
@@ -134,7 +129,6 @@ public class UserInterface {
                 G[i][j] = scanner.nextInt();
             }
         }
-        menu();
     }
 
     private String matrixAsString(int[][] matrix) {
