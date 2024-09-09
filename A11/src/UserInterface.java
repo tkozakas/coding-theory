@@ -64,7 +64,6 @@ public class UserInterface {
         System.out.println("Received vector with errors: " + vectorAsString(r));
         int[][] H = encoderDecoder.generateParityCheckMatrix(G, n, k);
         System.out.println("Parity check matrix: \n" + matrixAsString(H));
-        menu();
     }
 
     private void generateMatrix() {

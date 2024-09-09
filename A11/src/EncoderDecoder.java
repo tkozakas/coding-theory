@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class EncoderDecoder {
     private final Random random = new Random();
@@ -42,8 +43,7 @@ public class EncoderDecoder {
 
     public int[][] generateParityCheckMatrix(int[][] G, int n, int k) {
         /*
-        H = (-A^T|I)
-        stulpeliai virsta eilutėmis ir atvirkščiai
+        H = (A^T|I) - stulpeliai virsta eilutėmis ir atvirkščiai
 
         G = (1, 0, | 1, 0, 1)
             (0, 1, | 0, 1, 1)
@@ -52,9 +52,32 @@ public class EncoderDecoder {
         H = (1, 0, | 1, 0, 0)
             (0, 1, | 0, 1, 0)
             (1, 1, | 0, 0, 1)
-            <-A^T-> | <-I->
+            <A^T-> | <-I->
         */
 
-        int[][] At = new int[n - k][k];
+        // Step 1: Extract the submatrix A from G
+        int[][] A = new int[k][n - k]; // (k eilučių, n - k stulpelių)
+        IntStream.range(0, k)
+                .filter(_ -> n - k >= 0)
+                .forEach(i -> System.arraycopy(G[i], k, A[i], 0, n - k));
+
+        // Step 2: Transpose the submatrix A to get A^T
+        int[][] At = new int[n - k][k]; // (n - k eilučių, k stulpelių)
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < n - k; j++) {
+                At[j][i] = A[i][j];
+            }
+        }
+
+        // Step 3: Construct the parity check matrix H = (A^T | I)
+        int[][] H = new int[n - k][n]; // (n - k eilučių, k stulpelių)
+        for (int i = 0; i < n - k; i++) {
+            System.arraycopy(At[i], 0, H[i], 0, k);
+            for (int j = k; j < n; j++) {
+                H[i][j] = (i == j - k) ? 1 : 0;
+            }
+        }
+
+        return H;
     }
 }
