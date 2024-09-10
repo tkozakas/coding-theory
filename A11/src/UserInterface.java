@@ -10,7 +10,8 @@ public class UserInterface {
     private int[] m;
     private int n;
     private int k;
-    private int PROBABILITY = 10; // % error probability
+
+    private final int PROBABILITY = 10; // % error probability
 
     public UserInterface() {
         prompt();
