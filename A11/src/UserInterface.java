@@ -39,10 +39,10 @@ public class UserInterface {
 
     private void menu() {
         System.out.print("""
-                        Choose an option:
-                        1. Enter generating matrix
-                        2. Generate generating matrix
-                        Choice:\s"""
+                Choose an option:
+                1. Enter generating matrix
+                2. Generate generating matrix
+                Choice:\s"""
         );
         int choice = scanner.nextInt();
 
@@ -53,15 +53,16 @@ public class UserInterface {
     }
 
     private void sendVector() {
-        System.out.println("Error probability (%): " + PROBABILITY);
-        System.out.print("Matrix G: \n" + matrixAsString(G));
         System.out.printf("Sent vector %s%n", vectorAsString(m));
+        System.out.print("Matrix G: \n" + matrixAsString(G));
+        int[][] H = encoderDecoder.generateParityCheckMatrix(G, n, k);
+        System.out.println("Parity check matrix: \n" + matrixAsString(H));
+
+        System.out.println("Error probability (%): " + PROBABILITY);
         int[] c = encoderDecoder.encode(G, m);
         System.out.println("Encoded vector: " + vectorAsString(c));
         int[] r = encoderDecoder.error(c, PROBABILITY);
         System.out.println("Received vector with errors: " + vectorAsString(r));
-        int[][] H = encoderDecoder.generateParityCheckMatrix(G, n, k);
-        System.out.println("Parity check matrix: \n" + matrixAsString(H));
 
         List<CosetLeaderInfo> cosetLeaders = encoderDecoder.findAllCosetLeaders(H)
                 .stream()
@@ -95,10 +96,11 @@ public class UserInterface {
             (0, 0, 0, 0, 1, | 0, 1)
                               <-R-> Random
         */
-        System.out.print("Enter the number of rows (k): ");
-        k = scanner.nextInt();
+        scanner.nextLine();
         System.out.print("Enter the number of columns (n): ");
         n = scanner.nextInt();
+        System.out.print("Enter the number of rows (k): ");
+        k = scanner.nextInt();
 
         G = new int[k][n];
 
@@ -113,10 +115,10 @@ public class UserInterface {
     }
 
     private void enterMatrix() {
-        System.out.print("Enter the number of rows (k): ");
-        k = scanner.nextInt();
         System.out.print("Enter the number of columns (n): ");
         n = scanner.nextInt();
+        System.out.print("Enter the number of rows (k): ");
+        k = scanner.nextInt();
 
         G = new int[k][n];
 
@@ -125,10 +127,12 @@ public class UserInterface {
             enterMatrix();
         }
         System.out.println("Enter the matrix:");
+        scanner.nextLine();
         for (int i = 0; i < k; i++) {
-            for (int j = 0; j < n; j++) {
-                G[i][j] = scanner.nextInt();
-            }
+            G[i] = scanner.nextLine().chars()
+                    .filter(Character::isDigit)
+                    .map(c -> c - '0')
+                    .toArray();
         }
     }
 

@@ -47,48 +47,31 @@ public class EncoderDecoder {
         /*
         H = (A^T|I) - stulpeliai virsta eilutėmis ir atvirkščiai
 
-        G = (1, 0, | 1, 0, 1)
-            (0, 1, | 0, 1, 1)
-            <-I-> | <-A->
+        G = (1, 1, 0, 1, 0, 0)
+            (0, 1, 1, 0, 1, 0)
+            (1, 0, 1, 0, 0, 1)
 
-        H = (1, 0, | 1, 0, 0)
-            (0, 1, | 0, 1, 0)
-            (1, 1, | 0, 0, 1)
-            <A^T-> | <-I->
+        H = (A^T|I) = (1, 0, 0, 1, 0, 1)
+                      (0, 1, 0, 1, 1, 0)
+                      (0, 0, 1, 0, 1, 1)
         */
-        if (n == k) {
-            System.out.println("Parity check matrix H cannot be generated when n equals k. Returning an empty matrix.");
-            return new int[0][n]; // Return a matrix with 0 rows and n columns
-        }
 
-        // Extract the submatrix A from G
-        int[][] A = new int[k][n - k]; // A has dimensions (k rows, n - k columns)
-        for (int i = 0; i < k; i++) {
-            System.arraycopy(G[i], k, A[i], 0, n - k); // Copy the submatrix A from G
-        }
+        int[][] I = IntStream.range(0, n - k)
+                .mapToObj(i -> IntStream.range(0, n - k)
+                        .map(j -> i == j ? 1 : 0)
+                        .toArray())
+                .toArray(int[][]::new);
 
-        // Transpose the submatrix A to get A^T
-        int[][] At = new int[n - k][k]; // A^T has dimensions (n - k rows, k columns)
-        for (int i = 0; i < k; i++) {
-            for (int j = 0; j < n - k; j++) {
-                At[j][i] = A[i][j];
-            }
-        }
+        int[][] At = IntStream.range(0, n - k)
+                .mapToObj(i -> IntStream.range(0, k)
+                        .map(j -> G[j][i])
+                        .toArray())
+                .toArray(int[][]::new);
 
-        // Construct the parity check matrix H = (A^T | I)
-        int[][] H = new int[n - k][n]; // H has dimensions (n - k rows, n columns)
-        for (int i = 0; i < n - k; i++) {
-            System.arraycopy(At[i], 0, H[i], 0, k);
-            for (int j = k; j < n; j++) {
-                H[i][j] = (i == j - k) ? 1 : 0;
-            }
-        }
-
-        if (H[0].length == 0) {
-            throw new IllegalArgumentException("Parity check matrix H is not properly generated.");
-        }
-
-        return H;
+        return IntStream.range(0, n - k)
+                .mapToObj(i -> IntStream.concat(Arrays.stream(I[i]), Arrays.stream(At[i]))
+                        .toArray())
+                .toArray(int[][]::new);
     }
 
     public List<CosetLeaderInfo> findAllCosetLeaders(int[][] H) {
