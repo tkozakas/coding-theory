@@ -1,17 +1,10 @@
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class EncoderDecoder {
     private final Random random = new Random();
 
     public int[] encode(int[][] G, int[] m) {
         return matrixVectorMultiply(G, m);
-    }
-
-    private String arrayToBinaryString(int[] s) {
-        return Arrays.stream(s)
-                .mapToObj(String::valueOf)
-                .collect(Collectors.joining());
     }
 
     private static int[] matrixVectorMultiply(int[][] G, int[] m) {
@@ -37,17 +30,14 @@ public class EncoderDecoder {
     }
 
     public int[][] parityCheckMatrix(int[][] G) {
-    /*
-        G = (I | P) =   (1, 0, 0 | 1, 0, 1)
-                        (0, 1, 0 | 1, 1, 0)
-                        (0, 0, 1 | 0, 1, 1)
-        H = (P^T | I(n-k)) = (1, 1, 0, 1, 0, 0)
-                             (0, 1, 1, 0, 1, 0)
-                             (1, 0, 1, 0, 0, 1)
-
-
-
-     */
+        /*
+            G = (I | P) =   (1, 0, 0 | 1, 0, 1)
+                            (0, 1, 0 | 1, 1, 0)
+                            (0, 0, 1 | 0, 1, 1)
+            H = (P^T | I(n-k)) = (1, 1, 0, 1, 0, 0)
+                                 (0, 1, 1, 0, 1, 0)
+                                 (1, 0, 1, 0, 0, 1)
+         */
 
         int k = G.length;
         int n = G[0].length;
@@ -132,8 +122,7 @@ public class EncoderDecoder {
 
     public int[] decode(int[] r, int[][] H, List<CosetLeader> cosetLeaders) {
         int[] syndrome = syndrome(H, r);
-        String syndromeStr = Arrays.toString(syndrome);
-        System.out.println("Syndrome: " + syndromeStr);
+
         CosetLeader cosetLeader = cosetLeaders.stream()
                 .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
                 .findFirst()
