@@ -1,4 +1,7 @@
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class UserInterface {
@@ -53,31 +56,19 @@ public class UserInterface {
     }
 
     private void sendVector() {
-        System.out.printf("Sent vector %s%n", vectorAsString(m));
-        System.out.print("Matrix G: \n" + matrixAsString(G));
-        int[][] H = encoderDecoder.generateParityCheckMatrix(G, n, k);
-        System.out.println("Parity check matrix: \n" + matrixAsString(H));
-
-        System.out.println("Error probability (%): " + PROBABILITY);
         int[] c = encoderDecoder.encode(G, m);
-        System.out.println("Encoded vector: " + vectorAsString(c));
         int[] r = encoderDecoder.error(c, PROBABILITY);
-        System.out.println("Received vector with errors: " + vectorAsString(r));
+        int[][] H = encoderDecoder.parityCheckMatrix(G);
+        List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
+        int[] decoded = encoderDecoder.decode(r, H, cosetLeaders);
 
-        List<CosetLeaderInfo> cosetLeaders = encoderDecoder.findAllCosetLeaders(H)
-                .stream()
-                .sorted(Comparator.comparingInt(CosetLeaderInfo::weight))
-                .toList();
-
-        System.out.printf("%-12s | %-8s | %s%n", "Coset Leader", "Syndrome", "Weight of Syndrome");
-        System.out.println("---------------------------------------------");
-        cosetLeaders.forEach(info -> System.out.printf("%-12s | %-8s | %d%n",
-                vectorAsString(info.cosetLeader()),
-                vectorAsString(info.syndrome()),
-                info.weight()));
-
-        int[] d = encoderDecoder.decode(H, r, cosetLeaders);
-        System.out.println("Decoded vector: " + vectorAsString(d));
+        System.out.println("Vector to encode: " + vectorAsString(m));
+        System.out.println("Generating matrix:\n" + matrixAsString(G));
+        System.out.println("Encoded vector: " + vectorAsString(c));
+        System.out.println("Received vector: " + vectorAsString(r));
+        System.out.println("Parity check matrix:\n" + matrixAsString(H));
+        System.out.println("Coset leaders:\nSyndrome | Coset leader | Weight\n" + cosetLeaders);
+        System.out.println("Decoded vector: " + vectorAsString(decoded));
     }
 
     private void generateMatrix() {
@@ -137,19 +128,11 @@ public class UserInterface {
     }
 
     private String matrixAsString(int[][] matrix) {
-        StringBuilder matrixString = new StringBuilder();
-        for (int[] row : matrix) {
-            matrixString.append("[");
-            for (int j = 0; j < row.length; j++) {
-                matrixString.append(row[j]);
-                if (j >= row.length - 1) {
-                    continue;
-                }
-                matrixString.append(", ");
-            }
-            matrixString.append("]\n");
-        }
-        return matrixString.toString();
+        return "[ " + Arrays.stream(matrix)
+                .map(row -> Arrays.stream(row)
+                        .mapToObj(String::valueOf)
+                        .collect(Collectors.joining(", ")))
+                .collect(Collectors.joining("\n")) + " ]";
     }
 
 
