@@ -1,20 +1,17 @@
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class UserInterface {
     private final EncoderDecoder encoderDecoder = new EncoderDecoder();
     private final Random random = new Random();
-    private final Scanner scanner = new Scanner(System.in);
+    private Scanner scanner = new Scanner(System.in);
 
     private int[][] G;
     private int[] m;
     private int n;
     private int k;
 
-    private final int PROBABILITY = 10; // % error probability
+    private static final int PROBABILITY = 50; // % error probability
 
     public UserInterface() {
         prompt();
@@ -29,18 +26,57 @@ public class UserInterface {
 
            Vartotojas turi tureti galimybe pačiam įvesti generuojančią matricą, arba leisti programai ją sugeneruoti su k ir n parametrais
          */
-        menu();
-        scanner.nextLine();
+        matrixMenu();
+        inputMenu();
+    }
+
+    private void inputVector() {
+        scanner = new Scanner(System.in);
         System.out.println("Enter the vector to encode:");
         m = scanner.nextLine().chars()
                 .filter(Character::isDigit)
                 .map(c -> c - '0')
                 .toArray();
-
         sendVector();
     }
 
-    private void menu() {
+    private void inputMenu() {
+        scanner = new Scanner(System.in);
+        System.out.println("""
+                Choose an option:
+                1. Enter binary form vector
+                2. Enter text
+                Choice:\s""");
+
+        int choice = scanner.nextInt();
+        switch (choice) {
+            case 1 -> inputVector();
+            case 2 -> inputText();
+        }
+    }
+
+    private void inputText() {
+        scanner = new Scanner(System.in);
+        System.out.println("Enter the text to encode:");
+        String text = scanner.nextLine();
+        List<int[]> decodedResults = new ArrayList<>();
+
+        for (char c : text.toCharArray()) {
+            String binaryString = Integer.toBinaryString(c);
+            binaryString = "0".repeat(8 - binaryString.length()) + binaryString;
+
+            m = binaryString.chars().map(b -> b - '0').toArray();
+            int[] decodedVector = sendVector();
+            decodedResults.add(decodedVector);
+        }
+
+        System.out.println("Collected decoded vectors:");
+        for (int[] decoded : decodedResults) {
+            System.out.println(Arrays.toString(decoded));
+        }
+    }
+
+    private void matrixMenu() {
         System.out.print("""
                 Choose an option:
                 1. Enter generating matrix
@@ -55,20 +91,28 @@ public class UserInterface {
         }
     }
 
-    private void sendVector() {
+    private int[] sendVector() {
         int[] c = encoderDecoder.encode(G, m);
         int[] r = encoderDecoder.error(c, PROBABILITY);
         int[][] H = encoderDecoder.parityCheckMatrix(G);
         List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
+        cosetLeaders.sort(Comparator.comparingInt(CosetLeader::weight));
         int[] decoded = encoderDecoder.decode(r, H, cosetLeaders);
 
-        System.out.println("Vector to encode: " + vectorAsString(m));
         System.out.println("Generating matrix:\n" + matrixAsString(G));
-        System.out.println("Encoded vector: " + vectorAsString(c));
-        System.out.println("Received vector: " + vectorAsString(r));
         System.out.println("Parity check matrix:\n" + matrixAsString(H));
-        System.out.println("Coset leaders:\nSyndrome | Coset leader | Weight\n" + cosetLeaders);
+        System.out.println("Coset leaders:\nSyndrome | Coset leader | Weight\n" + cosetLeaders.stream()
+                .map(cl -> Arrays.toString(cl.syndrome()) + " | " + vectorAsString(cl.cosetLeader()) + " | " + cl.weight())
+                .collect(Collectors.joining("\n")));
+
+        System.out.println();
+
+        System.out.println("Vector to encode: " + vectorAsString(m));
+        System.out.println("Encoded vector: " + vectorAsString(c));
+        System.out.println("Received vector (with %d%% probability error): ".formatted(PROBABILITY) + vectorAsString(r));
         System.out.println("Decoded vector: " + vectorAsString(decoded));
+
+        return decoded;
     }
 
     private void generateMatrix() {
@@ -87,7 +131,6 @@ public class UserInterface {
             (0, 0, 0, 0, 1, | 0, 1)
                               <-R-> Random
         */
-        scanner.nextLine();
         System.out.print("Enter the number of columns (n): ");
         n = scanner.nextInt();
         System.out.print("Enter the number of rows (k): ");
@@ -128,11 +171,11 @@ public class UserInterface {
     }
 
     private String matrixAsString(int[][] matrix) {
-        return "[ " + Arrays.stream(matrix)
+        return "[" + Arrays.stream(matrix)
                 .map(row -> Arrays.stream(row)
                         .mapToObj(String::valueOf)
                         .collect(Collectors.joining(", ")))
-                .collect(Collectors.joining("\n")) + " ]";
+                .collect(Collectors.joining("\n")) + "]";
     }
 
 

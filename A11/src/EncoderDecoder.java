@@ -127,16 +127,13 @@ public class EncoderDecoder {
                 .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
                 .findFirst()
                 .orElseThrow();
-
-        if (cosetLeader.weight() == 0) {
-            return Arrays.copyOfRange(r, 0, H.length);
-        }
+        System.out.println("Coset leader: " + Arrays.toString(cosetLeader.cosetLeader()));
 
         int[] correctedVector = new int[r.length];
         for (int i = 0; i < r.length; i++) {
             correctedVector[i] = r[i] ^ cosetLeader.cosetLeader()[i];
         }
 
-        return Arrays.copyOfRange(correctedVector, 0, H.length);
+        return correctedVector;
     }
 }
