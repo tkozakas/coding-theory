@@ -8,8 +8,8 @@ import processor.TextProcessor;
 import java.util.Scanner;
 
 public class UserInterface {
-    private final EncoderDecoder encoderDecoder;
     private final Scanner scanner = new Scanner(System.in);
+    private final EncoderDecoder encoderDecoder;
 
     private double pe = 0.0001; // Probability of error
     private int q = 2; // Number of symbols in the alphabet
@@ -18,18 +18,16 @@ public class UserInterface {
     private int n;
     private int k;
 
-    private static final boolean DEBUG = true;
-
     public UserInterface() {
-        this.encoderDecoder = new EncoderDecoder(DEBUG);
+        encoderDecoder = new EncoderDecoder();
     }
 
     public void start() {
-        matrixMenu();
         mainMenu();
+        inputMenu();
     }
 
-    private void mainMenu() {
+    private void inputMenu() {
         while (true) {
             System.out.println("""
                     Choose an option:
@@ -46,7 +44,7 @@ public class UserInterface {
                 case 1 -> inputVector();
                 case 2 -> inputText();
                 case 3 -> inputImage();
-                case 4 -> matrixMenu();
+                case 4 -> mainMenu();
                 case 6 -> {
                     System.out.println("Exiting...");
                     return;
@@ -56,16 +54,17 @@ public class UserInterface {
         }
     }
 
-    private void matrixMenu() {
+    private void mainMenu() {
         while (true) {
-            System.out.printf("Probability of error: %.5f%nNumber of symbols in the alphabet: %d\n%n", pe, q);
-            System.out.print("""
+            System.out.printf("Probability of error: %.5f%nNumber of symbols in the alphabet: %d%n%n", pe, q);
+            System.out.printf("""
                     Choose an option:
                     1. Enter generating matrix
                     2. Generate generating matrix
                     3. Change probability of error
                     4. Change number of symbols in the alphabet
-                    Choice:\s""");
+                    5. Debug mode (currently %s)
+                    Choice:\s""", encoderDecoder.isDebug() ? "ON" : "OFF");
             int choice = scanner.nextInt();
             scanner.nextLine();
 
@@ -75,12 +74,16 @@ public class UserInterface {
                 case 3 -> {
                     System.out.print("Enter the new probability of error: ");
                     pe = scanner.nextDouble();
-                    matrixMenu();
+                    mainMenu();
                 }
                 case 4 -> {
                     System.out.print("Enter the new number of symbols in the alphabet: ");
                     q = scanner.nextInt();
-                    matrixMenu();
+                    mainMenu();
+                }
+                case 5 -> {
+                    encoderDecoder.setDebug(!encoderDecoder.isDebug());
+                    mainMenu();
                 }
                 default -> System.out.println("Invalid choice. Please try again.");
             }

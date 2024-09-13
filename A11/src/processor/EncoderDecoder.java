@@ -6,12 +6,8 @@ import java.util.*;
 
 public class EncoderDecoder {
     private final Random random = new Random();
-    private final boolean debug;
+    private boolean debug;
     private int introducedErrors = 0;
-
-    public EncoderDecoder(boolean debug) {
-        this.debug = debug;
-    }
 
     public int[] encode(int[] m, int[][] G) {
         StringBuilder message = Processor.getStringFromBits(m);
@@ -193,5 +189,13 @@ public class EncoderDecoder {
 
     public int getIntroducedErrors() {
         return introducedErrors;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
+
+    public boolean isDebug() {
+        return debug;
     }
 }
