@@ -1,9 +1,13 @@
+package processor;
+
+import model.CosetLeader;
+
 import java.util.*;
 
 public class EncoderDecoder {
     private final Random random = new Random();
 
-    public int[] encode(int[][] G, int[] m) {
+    public int[] encode(int[] m, int[][] G) {
         return matrixVectorMultiply(m, G);
     }
 
@@ -18,18 +22,17 @@ public class EncoderDecoder {
         return c;
     }
 
-    public int[] error(int[] c, int probability) {
-        int[] r = new int[c.length];
-        System.arraycopy(c, 0, r, 0, c.length);
+    public int[] introduceErrors(int[] c, int probability) {
+        int[] r = Arrays.copyOf(c, c.length);
         for (int i = 0; i < r.length; i++) {
             if (random.nextInt(100) < probability) {
-                r[i] = (r[i] == 0) ? 1 : 0;
+                r[i] ^= 1; // Flip the bit
             }
         }
         return r;
     }
 
-    public int[][] parityCheckMatrix(int[][] G) {
+    public int[][] generateParityCheckMatrix(int[][] G) {
         int k = G.length;
         int n = G[0].length;
         int[][] P = new int[k][n - k];
@@ -54,7 +57,7 @@ public class EncoderDecoder {
         return H;
     }
 
-    public int[] syndrome(int[][] H, int[] r) {
+    public int[] computeSyndrome(int[][] H, int[] r) {
         int[] s = new int[H.length];
         for (int i = 0; i < H.length; i++) {
             for (int j = 0; j < H[0].length; j++) {
@@ -65,14 +68,6 @@ public class EncoderDecoder {
         return s;
     }
 
-    public int hammingWeight(int[] vector) {
-        int weight = 0;
-        for (int bit : vector) {
-            weight += bit;
-        }
-        return weight;
-    }
-
     public List<CosetLeader> findCosetLeaders(int[][] H) {
         int n = H[0].length;
         Map<String, CosetLeader> cosetLeadersMap = new HashMap<>();
@@ -80,14 +75,17 @@ public class EncoderDecoder {
         for (int i = 0; i < (1 << n); i++) {
             int[] errorPattern = new int[n];
             for (int j = 0; j < n; j++) {
-                errorPattern[j] = (i >> j) & 1;
+                errorPattern[j] = (i >> (n - 1 - j)) & 1;
             }
 
-            int[] syndrome = syndrome(H, errorPattern);
+            int[] syndrome = computeSyndrome(H, errorPattern);
             String syndromeStr = Arrays.toString(syndrome);
 
-            if (!cosetLeadersMap.containsKey(syndromeStr) || hammingWeight(errorPattern) < cosetLeadersMap.get(syndromeStr).weight()) {
-                cosetLeadersMap.put(syndromeStr, new CosetLeader(syndrome, errorPattern, hammingWeight(errorPattern)));
+            int weight = hammingWeight(errorPattern);
+            CosetLeader existingLeader = cosetLeadersMap.get(syndromeStr);
+
+            if (existingLeader == null || weight < existingLeader.weight()) {
+                cosetLeadersMap.put(syndromeStr, new CosetLeader(syndrome, errorPattern, weight));
             }
         }
 
@@ -95,7 +93,7 @@ public class EncoderDecoder {
     }
 
     public int[] decode(int[] r, int[][] H, List<CosetLeader> cosetLeaders) {
-        int[] syndrome = syndrome(H, r);
+        int[] syndrome = computeSyndrome(H, r);
 
         CosetLeader cosetLeader = cosetLeaders.stream()
                 .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
@@ -108,5 +106,13 @@ public class EncoderDecoder {
         }
 
         return correctedVector;
+    }
+
+    private int hammingWeight(int[] vector) {
+        int weight = 0;
+        for (int bit : vector) {
+            weight += bit;
+        }
+        return weight;
     }
 }
