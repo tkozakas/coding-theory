@@ -106,7 +106,7 @@ public class UserInterface {
                 G[i][j] = (int) (Math.random() * 2);
             }
         }
-        inputVector();
+        inputMenu();
     }
 
     private void enterMatrix() {
