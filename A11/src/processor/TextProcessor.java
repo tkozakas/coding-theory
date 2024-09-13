@@ -42,6 +42,7 @@ public class TextProcessor extends Processor {
         int[] allDecodedBits = decodedResults.stream().flatMapToInt(Arrays::stream).boxed().mapToInt(Integer::intValue).toArray();
         StringBuilder decodedText = getStringFromBits(allDecodedBits);
 
+        System.out.println("\nIntroduced errors: " + encoderDecoder.getIntroducedErrors());
         System.out.printf("Decoded text: %s%n%n", decodedText);
     }
 

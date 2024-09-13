@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Processor {
     private final int errorProbability;
-    private final EncoderDecoder encoderDecoder;
+    protected final EncoderDecoder encoderDecoder;
     private final int[][] G;
 
     public Processor(EncoderDecoder encoderDecoder, int[][] G, int errorProbability) {

@@ -10,8 +10,8 @@ import java.util.Scanner;
 public class UserInterface {
     private final EncoderDecoder encoderDecoder;
     private final Scanner scanner = new Scanner(System.in);
-    private static final int ERROR_PROBABILITY = 1; // % error probability
-    private static final boolean DEBUG = false;
+    private static final int ERROR_PROBABILITY = 0; // % error probability
+    private static final boolean DEBUG = true;
     private int[][] G;
     private int n;
     private int k;

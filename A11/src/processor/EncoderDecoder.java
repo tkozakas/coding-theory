@@ -7,6 +7,7 @@ import java.util.*;
 public class EncoderDecoder {
     private final Random random = new Random();
     private final boolean debug;
+    private int introducedErrors = 0;
 
     public EncoderDecoder(boolean debug) {
         this.debug = debug;
@@ -14,17 +15,16 @@ public class EncoderDecoder {
 
     public int[] encode(int[] m, int[][] G) {
         StringBuilder message = Processor.getStringFromBits(m);
-        System.out.printf("\nEncoding message: %s (%s)%n", Arrays.toString(m), message);
+        System.out.println("\n=========================================\n");
+        System.out.printf("Encoding message (m): %s (%s)%n", Arrays.toString(m), message);
 
         int[] c = matrixVectorMultiply(m, G);
         if (debug) {
-            System.out.println("Message vector (m): " + Arrays.toString(m));
-            System.out.println("Generating matrix (G):");
+            System.out.println("\nGenerating matrix (G):");
             printMatrix(G);
-            System.out.println("Codeword (c): " + Arrays.toString(c));
-            System.out.println();
+            System.out.println("\nCodeword (c): " + Arrays.toString(c));
         } else {
-            System.out.println("Encoded message: " + Arrays.toString(c));
+            System.out.println("Encoded message (c): " + Arrays.toString(c));
         }
         return c;
     }
@@ -43,7 +43,7 @@ public class EncoderDecoder {
     public int[] introduceErrors(int[] c, int probability) {
         int[] r = Arrays.copyOf(c, c.length);
         if (debug) {
-            System.out.println("=== Introducing Errors ===");
+            System.out.println("\n=== Introducing Errors ===");
             System.out.println("Original codeword (c): " + Arrays.toString(c));
         }
         for (int i = 0; i < r.length; i++) {
@@ -51,10 +51,11 @@ public class EncoderDecoder {
                 r[i] ^= 1; // Flip the bit
                 if (debug) {
                     System.out.println("Error introduced at position " + i);
+                    introducedErrors++;
                 }
             }
         }
-        System.out.println("Transmitted vector with errors (r): " + Arrays.toString(r));
+        System.out.println("\nTransmitted vector with errors (r): " + Arrays.toString(r));
         return r;
     }
 
@@ -81,10 +82,9 @@ public class EncoderDecoder {
         }
 
         if (debug) {
-            System.out.println("=== Parity-Check Matrix Generation ===");
+            System.out.println("\n=== Parity-Check Matrix Generation ===");
             System.out.println("Parity-check matrix (H):");
             printMatrix(H);
-            System.out.println();
         }
         return H;
     }
@@ -105,8 +105,8 @@ public class EncoderDecoder {
         Map<String, CosetLeader> cosetLeadersMap = new HashMap<>();
 
         if (debug) {
-            System.out.println();
-            System.out.println("=== Finding Coset Leaders ===");
+            System.out.println("\n=== Finding Coset Leaders ===");
+            System.out.println("Syndrome | Error Pattern | Hamming Weight");
         }
 
         for (int i = 0; i < (1 << n); i++) {
@@ -131,12 +131,10 @@ public class EncoderDecoder {
 
         if (debug) {
             System.out.println("Total coset leaders found: " + cosetLeadersMap.size());
-            System.out.println();
         }
 
         return new ArrayList<>(cosetLeadersMap.values());
     }
-
 
     public int[] decode(int[] r, int[][] H, List<CosetLeader> cosetLeaders) {
         int[] syndrome = computeSyndrome(H, r);
@@ -147,7 +145,7 @@ public class EncoderDecoder {
                 .orElseThrow(() -> new RuntimeException("No matching coset leader found."));
 
         if (debug) {
-            System.out.println("=== Decoding ===");
+            System.out.println("\n=== Decoding ===");
             System.out.println("Syndrome (s): " + Arrays.toString(syndrome));
             System.out.println("Selected coset leader: " + Arrays.toString(cosetLeader.cosetLeader()));
         }
@@ -158,8 +156,7 @@ public class EncoderDecoder {
         }
 
         StringBuilder correctedMessage = Processor.getStringFromBits(correctedVector);
-        System.out.printf("Corrected codeword: %s (%s)%n", Arrays.toString(correctedVector), correctedMessage);
-
+        System.out.printf("\nCorrected codeword: %s (%s)%n", Arrays.toString(correctedVector), correctedMessage);
         return correctedVector;
     }
 
@@ -175,5 +172,9 @@ public class EncoderDecoder {
         for (int[] row : matrix) {
             System.out.println(Arrays.toString(row));
         }
+    }
+
+    public int getIntroducedErrors() {
+        return introducedErrors;
     }
 }
