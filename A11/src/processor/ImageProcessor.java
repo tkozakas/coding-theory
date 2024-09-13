@@ -5,14 +5,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ImageProcessor extends Processor {
-    private final int k;
 
     public ImageProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
-        super(encoderDecoder, G, pe, q);
-        this.k = k;
+        super(encoderDecoder, G, k, pe, q);
     }
 
     public void processImage(String inputPath, String outputPath) {
@@ -39,8 +38,8 @@ public class ImageProcessor extends Processor {
                     sendChunk(decodedResults, bits);
                 }
             }
-            StringBuilder decodedBits = collectDecoded(decodedResults);
-            binaryToImage(decodedBits.toString(), width, height, outputPath);
+            int[] allDecodedBits = decodedResults.stream().flatMapToInt(Arrays::stream).boxed().mapToInt(Integer::intValue).toArray();
+            binaryToImage(allDecodedBits, width, height, outputPath);
             System.out.println("\nIntroduced errors: " + encoderDecoder.getIntroducedErrors());
             System.out.printf("Decoded image written to: %s%n%n", outputPath);
         } catch (IOException e) {
@@ -48,45 +47,24 @@ public class ImageProcessor extends Processor {
         }
     }
 
-    private void sendChunk(List<int[]> decodedResults, int[] bits) {
-        for (int i = 0; i < bits.length; i += k) {
-            int[] m = new int[k];
-            int bitsToCopy = Math.min(k, bits.length - i);
-            System.arraycopy(bits, i, m, 0, bitsToCopy);
-            // Pad with zeros if necessary
-
-            int[] decodedMessage = processBlock(m, k);
-            decodedResults.add(decodedMessage);
-        }
-    }
-
-    private StringBuilder collectDecoded(List<int[]> decodedResults) {
-        StringBuilder decodedBits = new StringBuilder();
-        for (int[] decoded : decodedResults) {
-            for (int bit : decoded) {
-                decodedBits.append(bit);
-            }
-        }
-        return decodedBits;
-    }
-
-    private void binaryToImage(String bitsString, int width, int height, String outputPath) throws IOException {
+    private void binaryToImage(int[] decodedBits, int width, int height, String outputPath) throws IOException {
         BufferedImage decodedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         int bitIndex = 0;
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (bitIndex + 24 > bitsString.length()) {
+                if (bitIndex + 24 > decodedBits.length) { // Ensure there are enough bits to read
                     break;
                 }
                 int red = 0, green = 0, blue = 0;
                 for (int i = 0; i < 8; i++) {
-                    red |= (bitsString.charAt(bitIndex++) - '0') << (7 - i);
+                    red |= (decodedBits[bitIndex++] << (7 - i));
                 }
                 for (int i = 0; i < 8; i++) {
-                    green |= (bitsString.charAt(bitIndex++) - '0') << (7 - i);
+                    green |= (decodedBits[bitIndex++] << (7 - i));
                 }
                 for (int i = 0; i < 8; i++) {
-                    blue |= (bitsString.charAt(bitIndex++) - '0') << (7 - i);
+                    blue |= (decodedBits[bitIndex++] << (7 - i));
                 }
                 int rgb = (red << 16) | (green << 8) | blue;
                 decodedImage.setRGB(x, y, rgb);

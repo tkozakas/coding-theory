@@ -3,14 +3,10 @@ package processor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class TextProcessor extends Processor {
-    private final int k;
-
     public TextProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
-        super(encoderDecoder, G, pe, q);
-        this.k = k;
+        super(encoderDecoder, G, k, pe, q);
     }
 
     public void processText(String text) {
@@ -23,19 +19,8 @@ public class TextProcessor extends Processor {
             bitStringBuilder.append(binaryString);
         }
         String bitString = bitStringBuilder.toString();
-
-        // Process bits in blocks of size k
-        for (int i = 0; i < bitString.length(); i += k) {
-            String block = bitString.substring(i, Math.min(i + k, bitString.length()));
-            // Initialize m with zeros
-            int[] m = IntStream.range(0, k).map(_ -> 0).toArray();
-
-            // Fill m with actual bits
-            IntStream.range(0, block.length()).forEach(j -> m[j] = block.charAt(j) - '0');
-
-            int[] decodedMessage = processBlock(m, k);
-            decodedResults.add(decodedMessage);
-        }
+        int[] bits = bitString.chars().map(c -> c - '0').toArray();
+        sendChunk(decodedResults, bits);
 
         // Collect all decoded bits into a single array
         int[] allDecodedBits = decodedResults.stream().flatMapToInt(Arrays::stream).boxed().mapToInt(Integer::intValue).toArray();

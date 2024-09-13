@@ -140,7 +140,7 @@ public class UserInterface {
             m[i] = Integer.parseInt(numbers[i]);
         }
 
-        Processor processor = new Processor(encoderDecoder, G, PE, Q);
+        Processor processor = new Processor(encoderDecoder, G, k, PE, Q);
         processor.processBlock(m, k);
     }
 

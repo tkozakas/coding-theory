@@ -9,13 +9,14 @@ public class Processor {
     private final double pe;
     private final int[][] G;
     private final int q;
+    private final int k;
 
-
-    public Processor(EncoderDecoder encoderDecoder, int[][] G, double pe, int q) {
+    public Processor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
         this.encoderDecoder = encoderDecoder;
         this.pe = pe;
         this.q = q;
         this.G = G;
+        this.k = k;
     }
 
     public static StringBuilder getStringFromBits(int[] bits) {
@@ -45,5 +46,17 @@ public class Processor {
         int[] decodedMessage = new int[k];
         System.arraycopy(decoded, 0, decodedMessage, 0, k);
         return decodedMessage;
+    }
+
+    protected void sendChunk(List<int[]> decodedResults, int[] bits) {
+        for (int i = 0; i < bits.length; i += k) {
+            int[] m = new int[k];
+            int bitsToCopy = Math.min(k, bits.length - i);
+            System.arraycopy(bits, i, m, 0, bitsToCopy);
+            // Pad with zeros if necessary
+
+            int[] decodedMessage = processBlock(m, k);
+            decodedResults.add(decodedMessage);
+        }
     }
 }
