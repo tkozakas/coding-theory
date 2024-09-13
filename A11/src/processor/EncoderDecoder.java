@@ -53,13 +53,15 @@ public class EncoderDecoder {
             if (a < pe) {
                 if (q == 2) {
                     r[i] ^= 1;
-                } else {
+                } else if (q > 2) {
                     int currentSymbol = r[i];
                     int newSymbol;
                     do {
                         newSymbol = random.nextInt(q);
                     } while (newSymbol == currentSymbol);
                     r[i] = newSymbol;
+                } else {
+                    throw new IllegalArgumentException("Invalid value for q: " + q);
                 }
 
                 if (debug) {
