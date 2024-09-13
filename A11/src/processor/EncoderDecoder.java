@@ -171,8 +171,7 @@ public class EncoderDecoder {
         int[] decodedMessage = new int[k];
         System.arraycopy(correctedVector, 0, decodedMessage, 0, k);
 
-        StringBuilder correctedMessage = Processor.getStringFromBits(correctedVector);
-        System.out.printf("Corrected codeword: %s (%s)%n", Arrays.toString(correctedVector), correctedMessage);
+        System.out.printf("Corrected codeword: %s%n", Arrays.toString(correctedVector));
         System.out.printf("Decoded message: %s (%s)%n", Arrays.toString(decodedMessage), Processor.getStringFromBits(decodedMessage));
         return decodedMessage;
     }
