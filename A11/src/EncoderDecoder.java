@@ -4,14 +4,14 @@ public class EncoderDecoder {
     private final Random random = new Random();
 
     public int[] encode(int[][] G, int[] m) {
-        return matrixVectorMultiply(G, m);
+        return matrixVectorMultiply(m, G);
     }
 
-    private static int[] matrixVectorMultiply(int[][] G, int[] m) {
+    private int[] matrixVectorMultiply(int[] m, int[][] G) {
         int[] c = new int[G[0].length];
         for (int i = 0; i < G[0].length; i++) {
-            for (int j = 0; j < G.length; j++) {
-                c[i] += G[j][i] * m[j];
+            for (int j = 0; j < m.length; j++) {
+                c[i] += m[j] * G[j][i];
             }
             c[i] %= 2;
         }
@@ -30,15 +30,6 @@ public class EncoderDecoder {
     }
 
     public int[][] parityCheckMatrix(int[][] G) {
-        /*
-            G = (I | P) =   (1, 0, 0 | 1, 0, 1)
-                            (0, 1, 0 | 1, 1, 0)
-                            (0, 0, 1 | 0, 1, 1)
-            H = (P^T | I(n-k)) = (1, 1, 0, 1, 0, 0)
-                                 (0, 1, 1, 0, 1, 0)
-                                 (1, 0, 1, 0, 0, 1)
-         */
-
         int k = G.length;
         int n = G[0].length;
         int[][] P = new int[k][n - k];
@@ -56,39 +47,22 @@ public class EncoderDecoder {
 
         int[][] H = new int[n - k][n];
         for (int i = 0; i < n - k; i++) {
-            System.arraycopy(Pt[i], 0, H[i], 0, n - k);
-            H[i][n - k + i] = 1;
+            System.arraycopy(Pt[i], 0, H[i], 0, k);
+            H[i][k + i] = 1;
         }
 
         return H;
     }
 
     public int[] syndrome(int[][] H, int[] r) {
-        /*
-            H = (1, 1, 0)
-                (0, 1, 1)
-                (1, 0, 1)
-                (1, 0, 0)
-                (0, 1, 0)
-                (0, 0, 1)
-            r = (1, 0, 1, 1, 0, 1)
-            s = H^T * r = (1, 0, 1, 1, 1, 0) * (1, 0, 1)
-                                               (1, 1, 0)
-                                               (0, 1, 1)
-                                               (1, 0, 0)
-                                               (0, 1, 0)
-                                               (0, 0, 1)
-
-         */
-
-        int[][] Ht = new int[H[0].length][H.length];
+        int[] s = new int[H.length];
         for (int i = 0; i < H.length; i++) {
             for (int j = 0; j < H[0].length; j++) {
-                Ht[j][i] = H[i][j];
+                s[i] += H[i][j] * r[j];
             }
+            s[i] %= 2;
         }
-
-        return matrixVectorMultiply(Ht, r);
+        return s;
     }
 
     public int hammingWeight(int[] vector) {
@@ -106,7 +80,7 @@ public class EncoderDecoder {
         for (int i = 0; i < (1 << n); i++) {
             int[] errorPattern = new int[n];
             for (int j = 0; j < n; j++) {
-                errorPattern[j] = (i >> (n - 1 - j)) & 1;
+                errorPattern[j] = (i >> j) & 1;
             }
 
             int[] syndrome = syndrome(H, errorPattern);
@@ -126,12 +100,11 @@ public class EncoderDecoder {
         CosetLeader cosetLeader = cosetLeaders.stream()
                 .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
                 .findFirst()
-                .orElseThrow();
-        System.out.println("Coset leader: " + Arrays.toString(cosetLeader.cosetLeader()));
+                .orElseThrow(() -> new RuntimeException("No matching coset leader found."));
 
         int[] correctedVector = new int[r.length];
         for (int i = 0; i < r.length; i++) {
-            correctedVector[i] = r[i] ^ cosetLeader.cosetLeader()[i];
+            correctedVector[i] = (r[i] + cosetLeader.cosetLeader()[i]) % 2;
         }
 
         return correctedVector;
