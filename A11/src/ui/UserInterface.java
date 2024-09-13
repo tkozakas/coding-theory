@@ -11,8 +11,8 @@ public class UserInterface {
     private final EncoderDecoder encoderDecoder;
     private final Scanner scanner = new Scanner(System.in);
 
-    private static final double PE = 0.0001; // Probability of error
-    private static final int Q = 2; // Number of symbols in the alphabet
+    private double pe = 0.0001; // Probability of error
+    private int q = 2; // Number of symbols in the alphabet
 
     private int[][] G;
     private int n;
@@ -58,22 +58,29 @@ public class UserInterface {
 
     private void matrixMenu() {
         while (true) {
+            System.out.printf("Probability of error: %.5f%nNumber of symbols in the alphabet: %d\n%n", pe, q);
             System.out.print("""
                     Choose an option:
                     1. Enter generating matrix
                     2. Generate generating matrix
+                    3. Change probability of error
+                    4. Change number of symbols in the alphabet
                     Choice:\s""");
             int choice = scanner.nextInt();
             scanner.nextLine();
 
             switch (choice) {
-                case 1 -> {
-                    enterMatrix();
-                    return;
+                case 1 -> enterMatrix();
+                case 2 -> generateMatrix();
+                case 3 -> {
+                    System.out.print("Enter the new probability of error: ");
+                    pe = scanner.nextDouble();
+                    matrixMenu();
                 }
-                case 2 -> {
-                    generateMatrix();
-                    return;
+                case 4 -> {
+                    System.out.print("Enter the new number of symbols in the alphabet: ");
+                    q = scanner.nextInt();
+                    matrixMenu();
                 }
                 default -> System.out.println("Invalid choice. Please try again.");
             }
@@ -96,6 +103,7 @@ public class UserInterface {
                 G[i][j] = (int) (Math.random() * 2);
             }
         }
+        inputVector();
     }
 
     private void enterMatrix() {
@@ -129,6 +137,7 @@ public class UserInterface {
             System.out.println("Error: Invalid input. Please try again.");
             enterMatrix();
         }
+        inputVector();
     }
 
     private void inputVector() {
@@ -140,7 +149,7 @@ public class UserInterface {
             m[i] = Integer.parseInt(numbers[i]);
         }
 
-        Processor processor = new Processor(encoderDecoder, G, k, PE, Q);
+        Processor processor = new Processor(encoderDecoder, G, k, pe, q);
         processor.processBlock(m, k);
     }
 
@@ -148,7 +157,7 @@ public class UserInterface {
         System.out.println("Enter the text to encode:");
         String text = scanner.nextLine();
 
-        TextProcessor textProcessor = new TextProcessor(encoderDecoder, G, k, PE, Q);
+        TextProcessor textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
         textProcessor.processText(text);
     }
 
@@ -158,7 +167,7 @@ public class UserInterface {
         System.out.println("Enter the output path for the decoded image:");
         String outputPath = scanner.nextLine();
 
-        ImageProcessor imageProcessor = new ImageProcessor(encoderDecoder, G, k, PE, Q);
+        ImageProcessor imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
         imageProcessor.processImage(inputPath, outputPath);
     }
 }
