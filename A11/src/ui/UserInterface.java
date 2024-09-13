@@ -56,7 +56,7 @@ public class UserInterface {
 
     private void mainMenu() {
         while (true) {
-            System.out.printf("Probability of error: %.5f%nNumber of symbols in the alphabet: %d%n%n", pe, q);
+            System.out.printf("%n%nProbability of error: %.5f%nNumber of symbols in the alphabet: %d%n%n", pe, q);
             System.out.printf("""
                     Choose an option:
                     1. Enter generating matrix
@@ -145,12 +145,10 @@ public class UserInterface {
 
     private void inputVector() {
         System.out.println("Enter the vector to encode:");
-        String vectorInput = scanner.nextLine();
-        String[] numbers = vectorInput.trim().split("\\s+");
-        int[] m = new int[numbers.length];
-        for (int i = 0; i < numbers.length; i++) {
-            m[i] = Integer.parseInt(numbers[i]);
-        }
+        int[] m = scanner.nextLine().chars()
+                .filter(Character::isDigit)
+                .map(c -> c - '0')
+                .toArray();
 
         Processor processor = new Processor(encoderDecoder, G, k, pe, q);
         processor.processBlock(m, k);

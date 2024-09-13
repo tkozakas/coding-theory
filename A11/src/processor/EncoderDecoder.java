@@ -61,13 +61,13 @@ public class EncoderDecoder {
                 }
 
                 if (debug) {
-                    System.out.printf("Error introduced at position %d: new symbol = %d%n", i, r[i]);
+                    System.out.printf("Error introduced at position %d: new symbol = %d%n%n", i, r[i]);
                     introducedErrors++;
                 }
             }
         }
 
-        System.out.println("\nTransmitted vector with errors (r): " + Arrays.toString(r));
+        System.out.println("Transmitted vector with errors (r): " + Arrays.toString(r));
         return r;
     }
 
@@ -160,7 +160,7 @@ public class EncoderDecoder {
         if (debug) {
             System.out.println("\n=== Decoding ===");
             System.out.println("Syndrome (s): " + Arrays.toString(syndrome));
-            System.out.println("Selected coset leader: " + Arrays.toString(cosetLeader.cosetLeader()));
+            System.out.printf("Selected coset leader: %s%n", Arrays.toString(cosetLeader.cosetLeader()));
         }
 
         int[] correctedVector = new int[r.length];
@@ -169,7 +169,7 @@ public class EncoderDecoder {
         }
 
         StringBuilder correctedMessage = Processor.getStringFromBits(correctedVector);
-        System.out.printf("\nCorrected codeword: %s (%s)%n", Arrays.toString(correctedVector), correctedMessage);
+        System.out.printf("Corrected codeword: %s (%s)%n", Arrays.toString(correctedVector), correctedMessage);
         return correctedVector;
     }
 
