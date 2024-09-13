@@ -140,7 +140,7 @@ public class UserInterface {
             System.out.println("Error: Invalid input. Please try again.");
             enterMatrix();
         }
-        inputVector();
+        inputMenu();
     }
 
     private void inputVector() {
