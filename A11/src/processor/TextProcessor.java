@@ -3,14 +3,13 @@ package processor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TextProcessor extends Processor {
     private final int k;
 
-    public TextProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, int errorProbability) {
-        super(encoderDecoder, G, errorProbability);
+    public TextProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
+        super(encoderDecoder, G, pe, q);
         this.k = k;
     }
 

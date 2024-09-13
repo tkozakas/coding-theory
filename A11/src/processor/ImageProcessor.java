@@ -10,8 +10,8 @@ import java.util.List;
 public class ImageProcessor extends Processor {
     private final int k;
 
-    public ImageProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, int errorProbability) {
-        super(encoderDecoder, G, errorProbability);
+    public ImageProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
+        super(encoderDecoder, G, pe, q);
         this.k = k;
     }
 

@@ -10,11 +10,15 @@ import java.util.Scanner;
 public class UserInterface {
     private final EncoderDecoder encoderDecoder;
     private final Scanner scanner = new Scanner(System.in);
-    private static final int ERROR_PROBABILITY = 0; // % error probability
-    private static final boolean DEBUG = true;
+
+    private static final double PE = 0.0001; // Probability of error
+    private static final int Q = 2; // Number of symbols in the alphabet
+
     private int[][] G;
     private int n;
     private int k;
+
+    private static final boolean DEBUG = true;
 
     public UserInterface() {
         this.encoderDecoder = new EncoderDecoder(DEBUG);
@@ -95,30 +99,35 @@ public class UserInterface {
     }
 
     private void enterMatrix() {
-        System.out.print("Enter the number of columns (n): ");
-        n = scanner.nextInt();
-        System.out.print("Enter the number of rows (k): ");
-        k = scanner.nextInt();
-        scanner.nextLine();
+        try {
+            System.out.print("Enter the number of columns (n): ");
+            n = scanner.nextInt();
+            System.out.print("Enter the number of rows (k): ");
+            k = scanner.nextInt();
+            scanner.nextLine();
 
-        G = new int[k][n];
-        if (k > n) {
-            System.out.println("Error: The number of rows (k) should be less than or equal to the number of columns (n).");
-            enterMatrix();
-        } else {
-            System.out.println("Enter the matrix row by row (only 0s and 1s):");
-            for (int i = 0; i < k; i++) {
-                String rowInput = scanner.nextLine();
-                String[] numbers = rowInput.trim().split("\\s+");
-                if (numbers.length != n) {
-                    System.out.println("Error: Incorrect number of columns. Please enter the row again.");
-                    i--;
-                    continue;
-                }
-                for (int j = 0; j < n; j++) {
-                    G[i][j] = Integer.parseInt(numbers[j]);
+            G = new int[k][n];
+            if (k > n) {
+                System.out.println("Error: The number of rows (k) should be less than or equal to the number of columns (n).");
+                enterMatrix();
+            } else {
+                System.out.println("Enter the matrix row by row (only 0s and 1s):");
+                for (int i = 0; i < k; i++) {
+                    String rowInput = scanner.nextLine();
+                    String[] numbers = rowInput.trim().split("\\s+");
+                    if (numbers.length != n) {
+                        System.out.println("Error: Incorrect number of columns. Please enter the row again.");
+                        i--;
+                        continue;
+                    }
+                    for (int j = 0; j < n; j++) {
+                        G[i][j] = Integer.parseInt(numbers[j]);
+                    }
                 }
             }
+        } catch (Exception e) {
+            System.out.println("Error: Invalid input. Please try again.");
+            enterMatrix();
         }
     }
 
@@ -131,7 +140,7 @@ public class UserInterface {
             m[i] = Integer.parseInt(numbers[i]);
         }
 
-        Processor processor = new Processor(encoderDecoder, G, ERROR_PROBABILITY);
+        Processor processor = new Processor(encoderDecoder, G, PE, Q);
         processor.processBlock(m, k);
     }
 
@@ -139,7 +148,7 @@ public class UserInterface {
         System.out.println("Enter the text to encode:");
         String text = scanner.nextLine();
 
-        TextProcessor textProcessor = new TextProcessor(encoderDecoder, G, k, ERROR_PROBABILITY);
+        TextProcessor textProcessor = new TextProcessor(encoderDecoder, G, k, PE, Q);
         textProcessor.processText(text);
     }
 
@@ -149,7 +158,7 @@ public class UserInterface {
         System.out.println("Enter the output path for the decoded image:");
         String outputPath = scanner.nextLine();
 
-        ImageProcessor imageProcessor = new ImageProcessor(encoderDecoder, G, k, ERROR_PROBABILITY);
+        ImageProcessor imageProcessor = new ImageProcessor(encoderDecoder, G, k, PE, Q);
         imageProcessor.processImage(inputPath, outputPath);
     }
 }

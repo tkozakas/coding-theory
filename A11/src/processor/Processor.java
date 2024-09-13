@@ -5,14 +5,17 @@ import model.CosetLeader;
 import java.util.List;
 
 public class Processor {
-    private final int errorProbability;
     protected final EncoderDecoder encoderDecoder;
+    private final double pe;
     private final int[][] G;
+    private final int q;
 
-    public Processor(EncoderDecoder encoderDecoder, int[][] G, int errorProbability) {
+
+    public Processor(EncoderDecoder encoderDecoder, int[][] G, double pe, int q) {
         this.encoderDecoder = encoderDecoder;
+        this.pe = pe;
+        this.q = q;
         this.G = G;
-        this.errorProbability = errorProbability;
     }
 
     public static StringBuilder getStringFromBits(int[] bits) {
@@ -33,7 +36,7 @@ public class Processor {
 
     public int[] processBlock(int[] m, int k) {
         int[] c = encoderDecoder.encode(m, G);
-        int[] r = encoderDecoder.introduceErrors(c, errorProbability);
+        int[] r = encoderDecoder.introduceErrors(c, pe, q);
         int[][] H = encoderDecoder.generateParityCheckMatrix(G);
         List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
         int[] decoded = encoderDecoder.decode(r, H, cosetLeaders);

@@ -40,24 +40,39 @@ public class EncoderDecoder {
         return c;
     }
 
-    public int[] introduceErrors(int[] c, int probability) {
+    public int[] introduceErrors(int[] c, double pe, int q) {
         int[] r = Arrays.copyOf(c, c.length);
+
         if (debug) {
             System.out.println("\n=== Introducing Errors ===");
             System.out.println("Original codeword (c): " + Arrays.toString(c));
         }
+
         for (int i = 0; i < r.length; i++) {
-            if (random.nextInt(100) < probability) {
-                r[i] ^= 1; // Flip the bit
+            double a = random.nextDouble();
+            if (a < pe) {
+                if (q == 2) {
+                    r[i] ^= 1;
+                } else {
+                    int currentSymbol = r[i];
+                    int newSymbol;
+                    do {
+                        newSymbol = random.nextInt(q);
+                    } while (newSymbol == currentSymbol);
+                    r[i] = newSymbol;
+                }
+
                 if (debug) {
-                    System.out.println("Error introduced at position " + i);
+                    System.out.printf("Error introduced at position %d: new symbol = %d%n", i, r[i]);
                     introducedErrors++;
                 }
             }
         }
+
         System.out.println("\nTransmitted vector with errors (r): " + Arrays.toString(r));
         return r;
     }
+
 
     public int[][] generateParityCheckMatrix(int[][] G) {
         int k = G.length;
