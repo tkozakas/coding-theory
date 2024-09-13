@@ -1,9 +1,12 @@
 package processor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class TextProcessor extends Processor{
+public class TextProcessor extends Processor {
     private final int k;
 
     public TextProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, int errorProbability) {
@@ -25,30 +28,21 @@ public class TextProcessor extends Processor{
         // Process bits in blocks of size k
         for (int i = 0; i < bitString.length(); i += k) {
             String block = bitString.substring(i, Math.min(i + k, bitString.length()));
-            int[] m = new int[k];
-            for (int j = 0; j < block.length(); j++) {
-                m[j] = block.charAt(j) - '0';
-            }
-            // Pad remaining bits with zeros if necessary
+            // Initialize m with zeros
+            int[] m = IntStream.range(0, k).map(_ -> 0).toArray();
+
+            // Fill m with actual bits
+            IntStream.range(0, block.length()).forEach(j -> m[j] = block.charAt(j) - '0');
+
             int[] decodedMessage = processBlock(m, k);
             decodedResults.add(decodedMessage);
         }
 
-        // Reconstruct text from decoded bits
-        StringBuilder decodedBits = new StringBuilder();
-        for (int[] decoded : decodedResults) {
-            for (int bit : decoded) {
-                decodedBits.append(bit);
-            }
-        }
+        // Collect all decoded bits into a single array
+        int[] allDecodedBits = decodedResults.stream().flatMapToInt(Arrays::stream).boxed().mapToInt(Integer::intValue).toArray();
+        StringBuilder decodedText = getStringFromBits(allDecodedBits);
 
-        StringBuilder decodedText = new StringBuilder();
-        for (int i = 0; i + 8 <= decodedBits.length(); i += 8) {
-            String byteStr = decodedBits.substring(i, i + 8);
-            int charCode = Integer.parseInt(byteStr, 2);
-            decodedText.append((char) charCode);
-        }
-
-        System.out.println("Decoded text: " + decodedText);
+        System.out.printf("Decoded text: %s%n%n", decodedText);
     }
+
 }

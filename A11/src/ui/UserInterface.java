@@ -2,6 +2,7 @@ package ui;
 
 import processor.EncoderDecoder;
 import processor.ImageProcessor;
+import processor.Processor;
 import processor.TextProcessor;
 
 import java.util.Scanner;
@@ -9,13 +10,14 @@ import java.util.Scanner;
 public class UserInterface {
     private final EncoderDecoder encoderDecoder;
     private final Scanner scanner = new Scanner(System.in);
-    private static final int ERROR_PROBABILITY = 5; // % error probability
+    private static final int ERROR_PROBABILITY = 1; // % error probability
+    private static final boolean DEBUG = false;
     private int[][] G;
     private int n;
     private int k;
 
     public UserInterface() {
-        this.encoderDecoder = new EncoderDecoder();
+        this.encoderDecoder = new EncoderDecoder(DEBUG);
     }
 
     public void start() {
@@ -90,8 +92,6 @@ public class UserInterface {
                 G[i][j] = (int) (Math.random() * 2);
             }
         }
-        System.out.println("Generated generating matrix G:");
-        printMatrix(G);
     }
 
     private void enterMatrix() {
@@ -119,8 +119,6 @@ public class UserInterface {
                     G[i][j] = Integer.parseInt(numbers[j]);
                 }
             }
-            System.out.println("Entered generating matrix G:");
-            printMatrix(G);
         }
     }
 
@@ -133,9 +131,8 @@ public class UserInterface {
             m[i] = Integer.parseInt(numbers[i]);
         }
 
-        int[] c = encoderDecoder.encode(m, G);
-        System.out.println("Encoded vector:");
-        printVector(c);
+        Processor processor = new Processor(encoderDecoder, G, ERROR_PROBABILITY);
+        processor.processBlock(m, k);
     }
 
     private void inputText() {
@@ -154,21 +151,5 @@ public class UserInterface {
 
         ImageProcessor imageProcessor = new ImageProcessor(encoderDecoder, G, k, ERROR_PROBABILITY);
         imageProcessor.processImage(inputPath, outputPath);
-    }
-
-    private void printMatrix(int[][] matrix) {
-        for (int[] row : matrix) {
-            for (int val : row) {
-                System.out.print(val + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    private void printVector(int[] vector) {
-        for (int val : vector) {
-            System.out.print(val + " ");
-        }
-        System.out.println();
     }
 }
