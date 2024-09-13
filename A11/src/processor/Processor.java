@@ -40,12 +40,8 @@ public class Processor {
         int[] r = encoderDecoder.introduceErrors(c, pe, q);
         int[][] H = encoderDecoder.generateParityCheckMatrix(G);
         List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
-        int[] decoded = encoderDecoder.decode(r, H, cosetLeaders);
 
-        // Extract the message from the decoded codeword
-        int[] decodedMessage = new int[k];
-        System.arraycopy(decoded, 0, decodedMessage, 0, k);
-        return decodedMessage;
+        return encoderDecoder.decode(r, H, k, cosetLeaders);
     }
 
     protected void sendChunk(List<int[]> decodedResults, int[] bits) {

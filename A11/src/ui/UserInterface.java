@@ -150,6 +150,11 @@ public class UserInterface {
                 .map(c -> c - '0')
                 .toArray();
 
+        if (m.length != k) {
+            System.out.println("Error: The length of the vector should be equal to the number of rows (k) in the matrix.");
+            inputVector();
+        }
+
         Processor processor = new Processor(encoderDecoder, G, k, pe, q);
         processor.processBlock(m, k);
     }

@@ -149,7 +149,7 @@ public class EncoderDecoder {
         return new ArrayList<>(cosetLeadersMap.values());
     }
 
-    public int[] decode(int[] r, int[][] H, List<CosetLeader> cosetLeaders) {
+    public int[] decode(int[] r, int[][] H, int k, List<CosetLeader> cosetLeaders) {
         int[] syndrome = computeSyndrome(H, r);
 
         CosetLeader cosetLeader = cosetLeaders.stream()
@@ -168,9 +168,13 @@ public class EncoderDecoder {
             correctedVector[i] = (r[i] + cosetLeader.cosetLeader()[i]) % 2;
         }
 
+        int[] decodedMessage = new int[k];
+        System.arraycopy(correctedVector, 0, decodedMessage, 0, k);
+
         StringBuilder correctedMessage = Processor.getStringFromBits(correctedVector);
         System.out.printf("Corrected codeword: %s (%s)%n", Arrays.toString(correctedVector), correctedMessage);
-        return correctedVector;
+        System.out.printf("Decoded message: %s (%s)%n", Arrays.toString(decodedMessage), Processor.getStringFromBits(decodedMessage));
+        return decodedMessage;
     }
 
     private int hammingWeight(int[] vector) {
