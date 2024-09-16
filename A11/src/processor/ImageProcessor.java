@@ -47,6 +47,8 @@ public class ImageProcessor extends Processor {
             binaryToImage(allDecodedBits, width, height, outputPath);
             System.out.println("\nIntroduced errors: " + encoderDecoder.getIntroducedErrors());
             System.out.printf("Decoded image written to: %s%n%n", outputPath);
+
+            encoderDecoder.setIntroducedErrors(0);
         } catch (IOException e) {
             System.out.println("Error processing image: " + e.getMessage());
         }

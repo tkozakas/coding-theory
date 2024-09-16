@@ -32,6 +32,8 @@ public class TextProcessor extends Processor {
 
         System.out.println("\nIntroduced errors: " + encoderDecoder.getIntroducedErrors());
         System.out.printf("Decoded text: %s%n%n", decodedText);
+
+        encoderDecoder.setIntroducedErrors(0);
     }
 
 }

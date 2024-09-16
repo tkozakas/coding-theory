@@ -69,6 +69,7 @@ public class EncoderDecoder {
             if (a < pe) {
                 if (q == 2) {
                     r[i] ^= 1; // Flip the bit
+                    introducedErrors++;
                 } else if (q > 2) {
                     // Change the symbol to a random one
                     int currentSymbol = r[i];
@@ -77,13 +78,13 @@ public class EncoderDecoder {
                         newSymbol = random.nextInt(q);
                     } while (newSymbol == currentSymbol);
                     r[i] = newSymbol;
+                    introducedErrors++;
                 } else {
                     throw new IllegalArgumentException("Invalid value for q: " + q);
                 }
 
                 if (debug) {
                     System.out.printf("Error introduced at position %d: new symbol = %d%n%n", i, r[i]);
-                    introducedErrors++;
                 }
             }
         }
@@ -103,6 +104,10 @@ public class EncoderDecoder {
     public int[][] generateParityCheckMatrix(int[][] G) {
         int k = G.length;
         int n = G[0].length;
+
+        if (n <= k) {
+            throw new IllegalArgumentException("Invalid matrix dimensions: n must be greater than k to generate a parity-check matrix.");
+        }
 
         int[][] P = new int[k][n - k];
         for (int i = 0; i < k; i++) {
@@ -209,12 +214,17 @@ public class EncoderDecoder {
         CosetLeader cosetLeader = cosetLeaders.stream()
                 .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No matching coset leader found."));
+                .orElse(null);
 
         if (debug) {
             System.out.println("\n=== Decoding ===");
             System.out.println("Syndrome (s): " + Arrays.toString(syndrome));
-            System.out.printf("Selected coset leader: %s%n", Arrays.toString(cosetLeader.cosetLeader()));
+            System.out.printf("Selected coset leader: %s%n", cosetLeader == null ? "Not Found" : Arrays.toString(cosetLeader.cosetLeader()));
+        }
+
+        if (cosetLeader == null) {
+            System.out.println("Error: Coset leader not found for the received vector.");
+            return new int[0];
         }
 
         // Correct the received vector
@@ -261,5 +271,9 @@ public class EncoderDecoder {
 
     public boolean isDebug() {
         return debug;
+    }
+
+    public void setIntroducedErrors(int introducedErrors) {
+        this.introducedErrors = introducedErrors;
     }
 }
