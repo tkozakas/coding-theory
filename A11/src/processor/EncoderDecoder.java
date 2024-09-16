@@ -9,6 +9,13 @@ public class EncoderDecoder {
     private boolean debug;
     private int introducedErrors = 0;
 
+    /**
+     * Encodes a message using the generator matrix G.
+     *
+     * @param m message to encode
+     * @param G generator matrix
+     * @return encoded message
+     */
     public int[] encode(int[] m, int[][] G) {
         StringBuilder message = Processor.getStringFromBits(m);
         System.out.println("\n=========================================\n");
@@ -25,6 +32,12 @@ public class EncoderDecoder {
         return c;
     }
 
+    /**
+     * Multiplies a matrix by a vector.
+     * @param m vector
+     * @param G matrix
+     * @return result of the multiplication
+     */
     private int[] matrixVectorMultiply(int[] m, int[][] G) {
         int[] c = new int[G[0].length];
         for (int i = 0; i < G[0].length; i++) {
@@ -36,6 +49,13 @@ public class EncoderDecoder {
         return c;
     }
 
+    /**
+     * Introduces errors in a codeword.
+     * @param c codeword
+     * @param pe probability of error
+     * @param q number of symbols in the alphabet
+     * @return codeword with errors
+     */
     public int[] introduceErrors(int[] c, double pe, int q) {
         int[] r = Arrays.copyOf(c, c.length);
 
@@ -48,8 +68,9 @@ public class EncoderDecoder {
             double a = random.nextDouble();
             if (a < pe) {
                 if (q == 2) {
-                    r[i] ^= 1;
+                    r[i] ^= 1; // Flip the bit
                 } else if (q > 2) {
+                    // Change the symbol to a random one
                     int currentSymbol = r[i];
                     int newSymbol;
                     do {
@@ -71,12 +92,19 @@ public class EncoderDecoder {
         return r;
     }
 
-
+    /**
+     * Generates the parity-check matrix H from the generator matrix G.
+     * @param G generator matrix
+     * @return parity-check matrix
+     *
+     * G = [I_k | P]
+     * H = [P^T | I_(n-k)]
+     */
     public int[][] generateParityCheckMatrix(int[][] G) {
         int k = G.length;
         int n = G[0].length;
-        int[][] P = new int[k][n - k];
 
+        int[][] P = new int[k][n - k];
         for (int i = 0; i < k; i++) {
             System.arraycopy(G[i], k, P[i], 0, n - k);
         }
@@ -102,6 +130,14 @@ public class EncoderDecoder {
         return H;
     }
 
+    /**
+     * Computes the syndrome of a received vector.
+     * @param H parity-check matrix
+     * @param r received vector
+     * @return syndrome
+     *
+     * s = r * H^T
+     */
     public int[] computeSyndrome(int[][] H, int[] r) {
         int[] s = new int[H.length];
         for (int i = 0; i < H.length; i++) {
@@ -113,6 +149,11 @@ public class EncoderDecoder {
         return s;
     }
 
+    /**
+     * Finds the coset leaders of the code.
+     * @param H parity-check matrix
+     * @return list of coset leaders
+     */
     public List<CosetLeader> findCosetLeaders(int[][] H) {
         int n = H[0].length;
         Map<String, CosetLeader> cosetLeadersMap = new HashMap<>();
@@ -125,13 +166,16 @@ public class EncoderDecoder {
         for (int i = 0; i < (1 << n); i++) {
             int[] errorPattern = new int[n];
             for (int j = 0; j < n; j++) {
+                // find all possible error patterns
                 errorPattern[j] = (i >> (n - 1 - j)) & 1;
             }
-
+            // compute the syndrome
             int[] syndrome = computeSyndrome(H, errorPattern);
             String syndromeStr = Arrays.toString(syndrome);
 
+            // compute the weight of the error pattern
             int weight = hammingWeight(errorPattern);
+            // check if a coset leader already exists for the syndrome
             CosetLeader existingLeader = cosetLeadersMap.get(syndromeStr);
 
             if (existingLeader == null || weight < existingLeader.weight()) {
@@ -149,9 +193,19 @@ public class EncoderDecoder {
         return new ArrayList<>(cosetLeadersMap.values());
     }
 
+    /**
+     * Decodes a received vector.
+     * @param r received vector
+     * @param H parity-check matrix
+     * @param k message length
+     * @param cosetLeaders list of coset leaders
+     * @return decoded message
+     */
     public int[] decode(int[] r, int[][] H, int k, List<CosetLeader> cosetLeaders) {
+        // Compute the syndrome of the received vector
         int[] syndrome = computeSyndrome(H, r);
 
+        // Find the coset leader with the matching syndrome
         CosetLeader cosetLeader = cosetLeaders.stream()
                 .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
                 .findFirst()
@@ -163,11 +217,13 @@ public class EncoderDecoder {
             System.out.printf("Selected coset leader: %s%n", Arrays.toString(cosetLeader.cosetLeader()));
         }
 
+        // Correct the received vector
         int[] correctedVector = new int[r.length];
         for (int i = 0; i < r.length; i++) {
             correctedVector[i] = (r[i] + cosetLeader.cosetLeader()[i]) % 2;
         }
 
+        // Extract the decoded message
         int[] decodedMessage = new int[k];
         System.arraycopy(correctedVector, 0, decodedMessage, 0, k);
 
@@ -176,6 +232,11 @@ public class EncoderDecoder {
         return decodedMessage;
     }
 
+    /**
+     * Computes the Hamming weight of a vector.
+     * @param vector input vector
+     * @return Hamming weight
+     */
     private int hammingWeight(int[] vector) {
         int weight = 0;
         for (int bit : vector) {

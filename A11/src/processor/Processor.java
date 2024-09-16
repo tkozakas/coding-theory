@@ -46,11 +46,10 @@ public class Processor {
 
     protected void sendChunk(List<int[]> decodedResults, int[] bits) {
         for (int i = 0; i < bits.length; i += k) {
+            // Copy the next k bits into a new array
             int[] m = new int[k];
             int bitsToCopy = Math.min(k, bits.length - i);
             System.arraycopy(bits, i, m, 0, bitsToCopy);
-            // Pad with zeros if necessary
-
             int[] decodedMessage = processBlock(m, k);
             decodedResults.add(decodedMessage);
         }

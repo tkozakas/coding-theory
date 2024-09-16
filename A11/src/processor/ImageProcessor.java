@@ -14,6 +14,11 @@ public class ImageProcessor extends Processor {
         super(encoderDecoder, G, k, pe, q);
     }
 
+    /**
+     * Processes an image by reading it from the input path, encoding it, introducing errors, decoding it, and writing it to the output path.
+     * @param inputPath path to the input image
+     * @param outputPath path to write the output image
+     */
     public void processImage(String inputPath, String outputPath) {
         try {
             BufferedImage image = ImageIO.read(new File(inputPath));
@@ -47,6 +52,13 @@ public class ImageProcessor extends Processor {
         }
     }
 
+    /**
+     * Converts an array of bits to an image and writes it to the output path.
+     * @param decodedBits array of bits
+     * @param width width of the image
+     * @param height height of the image
+     * @param outputPath path to write the output image
+     */
     private void binaryToImage(int[] decodedBits, int width, int height, String outputPath) throws IOException {
         BufferedImage decodedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         int bitIndex = 0;

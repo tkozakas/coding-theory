@@ -8,7 +8,11 @@ public class TextProcessor extends Processor {
     public TextProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
         super(encoderDecoder, G, k, pe, q);
     }
-
+    
+    /** 
+     * Processes a text by encoding it, introducing errors, and decoding it.
+     * @param text text to process
+     */
     public void processText(String text) {
         List<int[]> decodedResults = new ArrayList<>();
 
