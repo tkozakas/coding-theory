@@ -1,5 +1,5 @@
 # Compile && Run
 ```bash
     mvn clean compile
-    mvn exec:java
+    mvn exec:java -Dexec.mainClass=Main
 ```

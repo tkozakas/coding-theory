@@ -8,9 +8,9 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <javafx.version>17</javafx.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <javafx.version>21</javafx.version>
     </properties>
 
     <dependencies>
@@ -29,7 +29,6 @@
 
     <build>
         <plugins>
-            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -40,7 +39,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Exec Maven Plugin to Run Java Application -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -49,7 +47,7 @@
                     <mainClass>Main</mainClass>
                     <arguments>
                         <argument>--module-path</argument>
-                        <argument>lib/javafx-sdk-17/lib</argument>
+                        <argument>${project.basedir}/javafx-sdk-21/lib</argument>
                         <argument>--add-modules</argument>
                         <argument>javafx.controls,javafx.fxml</argument>
                     </arguments>
