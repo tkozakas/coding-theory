@@ -239,7 +239,7 @@ public class EncoderDecoder {
         if (debug) {
             System.out.println("\n=== Decoding ===");
             System.out.println("Syndrome (s): " + Arrays.toString(syndrome));
-            System.out.printf("Selected coset leader: %s%n", cosetLeader == null ? "Not Found" : Arrays.toString(cosetLeader.cosetLeader()));
+            System.out.printf("Selected coset leader: %s%n", cosetLeader == null ? "Not Found" : Arrays.toString(cosetLeader.errorPattern()));
         }
 
         if (cosetLeader == null) {
@@ -250,7 +250,7 @@ public class EncoderDecoder {
         // Correct the received vector
         int[] correctedVector = new int[r.length];
         for (int i = 0; i < r.length; i++) {
-            correctedVector[i] = (r[i] + cosetLeader.cosetLeader()[i]) % 2;
+            correctedVector[i] = (r[i] + cosetLeader.errorPattern()[i]) % 2;
         }
 
         // Extract the decoded message

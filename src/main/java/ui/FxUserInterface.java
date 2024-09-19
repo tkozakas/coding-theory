@@ -6,28 +6,41 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.util.converter.IntegerStringConverter;
+import model.CosetLeader;
 import processor.EncoderDecoder;
 import processor.ImageProcessor;
 import processor.Processor;
 import processor.TextProcessor;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 public class FxUserInterface {
-
     @FXML
     private ComboBox<String> inputTypeComboBox;
 
     @FXML
-    private TextField inputField, columnsField, rowsField;
+    private TextField inputField;
+    @FXML
+    private TextField columnsField;
+    @FXML
+    private TextField rowsField;
+    @FXML
+    private TextField totalCosetLeaders;
 
     @FXML
     private TableView<Integer[]> generatingMatrixTable;
     @FXML
     private TableView<Integer[]> parityCheckMatrixTable;
+    @FXML
+    public TableView<CosetLeader> cosetLeaderTable;
 
     private boolean debugMode = false;
     private EncoderDecoder encoderDecoder;
+    private Processor processor;
+    private TextProcessor textProcessor;
+    private ImageProcessor imageProcessor;
 
     private final double pe = 0.0001; // Probability of error
     private final int q = 2; // Number of symbols in the alphabet
@@ -43,10 +56,11 @@ public class FxUserInterface {
         encoderDecoder = new EncoderDecoder();
     }
 
-    private void updateParityCheckMatrixTable() {
-        System.out.println("Generating matrix updated.");
+    private void updateMatrix() {
         H = encoderDecoder.generateParityCheckMatrix(G);
         setupMatrixTable(parityCheckMatrixTable, H, n - k, n);
+        List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
+        setupCosetLeaderTable(cosetLeaders);
     }
 
     @FXML
@@ -91,10 +105,36 @@ public class FxUserInterface {
             setupMatrixTable(generatingMatrixTable, G, k, n);
             H = encoderDecoder.generateParityCheckMatrix(G);
             setupMatrixTable(parityCheckMatrixTable, H, n - k, n);
+            List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
+            setupCosetLeaderTable(cosetLeaders);
+
+            processor = new Processor(encoderDecoder, G, k, pe, q);
+            textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
+            imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
 
         } catch (NumberFormatException e) {
             showAlert("Invalid input", "Please enter valid integers for n and k.");
         }
+    }
+
+    private void setupCosetLeaderTable(List<CosetLeader> cosetLeaders) {
+        cosetLeaderTable.getColumns().clear();
+        cosetLeaderTable.getItems().clear();
+
+        TableColumn<CosetLeader, String> syndromeColumn = new TableColumn<>("Syndrome");
+        syndromeColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(Arrays.toString(cellData.getValue().syndrome())));
+        cosetLeaderTable.getColumns().add(syndromeColumn);
+
+        TableColumn<CosetLeader, String> cosetLeaderColumn = new TableColumn<>("Error Pattern");
+        cosetLeaderColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(Arrays.toString(cellData.getValue().errorPattern())));
+        cosetLeaderTable.getColumns().add(cosetLeaderColumn);
+
+        TableColumn<CosetLeader, String> errorColumn = new TableColumn<>("Weight");
+        errorColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().weight()).asString());
+        cosetLeaderTable.getColumns().add(errorColumn);
+
+        cosetLeaderTable.getItems().addAll(cosetLeaders);
+        totalCosetLeaders.setText(String.valueOf(cosetLeaders.size()));
     }
 
     private void setupMatrixTable(TableView<Integer[]> table, int[][] matrix, int rows, int columns) {
@@ -125,7 +165,7 @@ public class FxUserInterface {
             if (newValue != null && (newValue == 0 || newValue == 1)) {
                 row[currentCol] = newValue;
                 G[event.getTablePosition().getRow()][currentCol] = newValue;
-                updateParityCheckMatrixTable();
+                updateMatrix();
             } else {
                 showAlert("Invalid Input", "Please enter only 0 or 1.");
             }
@@ -171,7 +211,7 @@ public class FxUserInterface {
                 return;
             }
 
-            Processor processor = new Processor(encoderDecoder, G, k, pe, q);
+            processor = new Processor(encoderDecoder, G, k, pe, q);
             processor.processBlock(m, k);
         } catch (Exception e) {
             showAlert("Error", "Invalid vector input. Please enter a valid binary vector.");
@@ -181,7 +221,7 @@ public class FxUserInterface {
     private void inputText() {
         try {
             String text = inputField.getText();
-            TextProcessor textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
+            textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
             textProcessor.processText(text);
         } catch (Exception e) {
             showAlert("Error", "Failed to process text. Please check your input and try again.");
@@ -193,19 +233,10 @@ public class FxUserInterface {
             String inputPath = inputField.getText();
             String outputPath = "img/img_decoded" + inputPath.substring(inputPath.lastIndexOf('.'));
 
-            ImageProcessor imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
+            imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
             imageProcessor.processImage(inputPath, outputPath);
         } catch (Exception e) {
             showAlert("Error", "Failed to process image. Please check the path and try again.");
-        }
-    }
-
-    @FXML
-    private void process() {
-        try {
-            processBlock();
-        } catch (Exception e) {
-            showAlert("Error", "Failed to process the whole input. Please try again.");
         }
     }
 

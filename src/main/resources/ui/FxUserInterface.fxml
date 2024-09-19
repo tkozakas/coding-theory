@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-<SplitPane dividerPositions="0.3" prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/22"
+<SplitPane dividerPositions="0.3" prefHeight="700" prefWidth="500" xmlns="http://javafx.com/javafx/21"
            xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.FxUserInterface">
     <GridPane hgap="10" minHeight="400.0" minWidth="400.0" prefHeight="400.0" prefWidth="400.0" vgap="10">
         <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
@@ -38,7 +38,7 @@
         </rowConstraints>
     </GridPane>
 
-    <GridPane hgap="10" minHeight="400.0" minWidth="500.0" prefHeight="400.0" prefWidth="406.0" vgap="10">
+    <GridPane hgap="20" minHeight="700.0" minWidth="500.0" prefHeight="700.0" prefWidth="500.0" vgap="10">
         <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
             <Label prefHeight="26.0" prefWidth="87.0" text="Columns (n):"/>
             <TextField fx:id="columnsField" prefHeight="26.0" prefWidth="66.0" promptText="Enter n"/>
@@ -56,6 +56,21 @@
             <Label style="-fx-font-weight: bold;" text="Parity Check Matrix (H):"/>
             <TableView fx:id="parityCheckMatrixTable" editable="true" prefHeight="200" prefWidth="280.0"/>
         </VBox>
+
+        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
+            <Label style="-fx-font-weight: bold;" text="Coset Leader:"/>
+        </HBox>
+
+        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3">
+            <TableView fx:id="cosetLeaderTable" editable="true" prefHeight="300" prefWidth="400.0"/>
+        </HBox>
+
+        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+            <Label prefHeight="26.0" prefWidth="40.0" text="Total:"/>
+            <TextField fx:id="totalCosetLeaders" editable="false" prefHeight="26.0" prefWidth="66.0"
+                       promptText="0"/>
+        </HBox>
+
         <columnConstraints>
             <ColumnConstraints/>
             <ColumnConstraints/>
