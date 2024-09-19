@@ -1,2 +1,5 @@
-# coding-theory
-Klaidas taisantys kodai 7 semestras
+# Compile && Run
+```bash
+    mvn clean compile
+    mvn exec:java
+```

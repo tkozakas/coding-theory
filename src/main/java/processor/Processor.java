@@ -5,13 +5,13 @@ import model.CosetLeader;
 import java.util.List;
 
 public class Processor {
-    protected final EncoderDecoder encoderDecoder;
+    protected final processor.EncoderDecoder encoderDecoder;
     private final double pe;
     private final int[][] G;
     private final int q;
     private final int k;
 
-    public Processor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
+    public Processor(processor.EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
         this.encoderDecoder = encoderDecoder;
         this.pe = pe;
         this.q = q;

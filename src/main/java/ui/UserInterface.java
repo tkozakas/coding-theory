@@ -7,6 +7,7 @@ import processor.Processor;
 import processor.TextProcessor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.IntStream;
@@ -177,7 +178,14 @@ public class UserInterface {
                     int[][] G = generateMatrix(k, n);
 
                     // Run a test encoding/decoding
-                    int[] testVector = IntStream.range(0, k).map(_ -> (int) (Math.random() * 2)).toArray();
+                    int[] testVector = new int[10];
+                    int count = 0;
+                    for (int z = 0; z < k; z++) {
+                        int i = (int) (Math.random() * 2);
+                        if (testVector.length == count) testVector = Arrays.copyOf(testVector, count * 2);
+                        testVector[count++] = i;
+                    }
+                    testVector = Arrays.copyOfRange(testVector, 0, count);
                     Processor processor = new Processor(encoderDecoder, G, k, pe, q);
                     int[] decoded = processor.processBlock(testVector, k);
 
