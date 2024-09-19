@@ -94,6 +94,26 @@ public class EncoderDecoder {
     }
 
     /**
+     * Generates a random generator matrix G.
+     *
+     * @param k message length
+     * @param n codeword length
+     * @return generator matrix
+     */
+    public int[][] generateGeneratingMatrix(int k, int n) {
+        int[][] matrix = new int[k][n];
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < k; j++) {
+                matrix[i][j] = (i == j) ? 1 : 0;
+            }
+            for (int j = k; j < n; j++) {
+                matrix[i][j] = (int) (Math.random() * 2);
+            }
+        }
+        return matrix;
+    }
+
+    /**
      * Generates the parity-check matrix H from the generator matrix G.
      * @param G generator matrix
      * @return parity-check matrix

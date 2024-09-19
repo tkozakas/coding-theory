@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.IntStream;
 
 public class UserInterface {
     private final Scanner scanner = new Scanner(System.in);
@@ -110,21 +109,8 @@ public class UserInterface {
         k = scanner.nextInt();
         scanner.nextLine();
 
-        G = generateMatrix(k, n);
+        G = encoderDecoder.generateGeneratingMatrix(k, n);
         inputMenu();
-    }
-
-    private int[][] generateMatrix(int k, int n) {
-        int[][] G = new int[k][n];
-        for (int i = 0; i < k; i++) {
-            for (int j = 0; j < k; j++) {
-                G[i][j] = i == j ? 1 : 0;
-            }
-            for (int j = k; j < n; j++) {
-                G[i][j] = (int) (Math.random() * 2);
-            }
-        }
-        return G;
     }
 
     private void enterMatrix() {
@@ -175,7 +161,7 @@ public class UserInterface {
                 for (double pe = 0.0001; pe <= 0.9; pe *= 2) {
                     long startTime = System.nanoTime();
 
-                    int[][] G = generateMatrix(k, n);
+                    int[][] G = encoderDecoder.generateGeneratingMatrix(k, n);
 
                     // Run a test encoding/decoding
                     int[] testVector = new int[10];

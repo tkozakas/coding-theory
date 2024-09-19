@@ -4,11 +4,14 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.FileChooser;
 import javafx.util.converter.IntegerStringConverter;
 import processor.EncoderDecoder;
 import processor.ImageProcessor;
 import processor.Processor;
 import processor.TextProcessor;
+
+import java.io.File;
 
 public class FxUserInterface {
 
@@ -19,7 +22,9 @@ public class FxUserInterface {
     private TextField inputField, columnsField, rowsField;
 
     @FXML
-    private TableView<Integer[]> generatingMatrixTable, parityCheckMatrixTable;
+    private TableView<Integer[]> generatingMatrixTable;
+    @FXML
+    private TableView<Integer[]> parityCheckMatrixTable;
 
     private boolean debugMode = false;
     private EncoderDecoder encoderDecoder;
@@ -28,6 +33,7 @@ public class FxUserInterface {
     private final int q = 2; // Number of symbols in the alphabet
 
     private int[][] G;
+    private int[][] H;
     private int n;
     private int k;
 
@@ -37,16 +43,37 @@ public class FxUserInterface {
         encoderDecoder = new EncoderDecoder();
     }
 
+    private void updateParityCheckMatrixTable() {
+        System.out.println("Generating matrix updated.");
+        H = encoderDecoder.generateParityCheckMatrix(G);
+        setupMatrixTable(parityCheckMatrixTable, H, n - k, n);
+    }
+
     @FXML
     private void handleInputTypeSelection() {
+        inputField.clear();
         String selectedType = inputTypeComboBox.getValue();
         inputField.setPromptText(switch (selectedType) {
             case "Vector" -> "Enter vector (e.g., 1 0 1)";
             case "Text" -> "Enter text";
-            case "Image" -> "Enter image path";
+            case "Image" -> handleImageInput();
             default -> "Enter input";
         });
         System.out.println("Selected input type: " + selectedType);
+    }
+
+    private String handleImageInput() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Image File");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
+        );
+
+        File selectedFile = fileChooser.showOpenDialog(inputField.getScene().getWindow());
+        if (selectedFile != null) {
+            inputField.setText(selectedFile.getPath());
+        }
+        return "Enter image path";
     }
 
     @FXML
@@ -60,31 +87,14 @@ public class FxUserInterface {
                 return;
             }
 
-            G = generateGeneratingMatrix(k, n);
+            G = encoderDecoder.generateGeneratingMatrix(k, n);
             setupMatrixTable(generatingMatrixTable, G, k, n);
-            int[][] H = generateParityCheckMatrix(G);
+            H = encoderDecoder.generateParityCheckMatrix(G);
             setupMatrixTable(parityCheckMatrixTable, H, n - k, n);
 
         } catch (NumberFormatException e) {
             showAlert("Invalid input", "Please enter valid integers for n and k.");
         }
-    }
-
-    private int[][] generateGeneratingMatrix(int k, int n) {
-        int[][] matrix = new int[k][n];
-        for (int i = 0; i < k; i++) {
-            for (int j = 0; j < k; j++) {
-                matrix[i][j] = (i == j) ? 1 : 0;
-            }
-            for (int j = k; j < n; j++) {
-                matrix[i][j] = (int) (Math.random() * 2);
-            }
-        }
-        return matrix;
-    }
-
-    private int[][] generateParityCheckMatrix(int[][] G) {
-        return encoderDecoder.generateParityCheckMatrix(G);
     }
 
     private void setupMatrixTable(TableView<Integer[]> table, int[][] matrix, int rows, int columns) {
@@ -114,6 +124,8 @@ public class FxUserInterface {
             Integer newValue = event.getNewValue();
             if (newValue != null && (newValue == 0 || newValue == 1)) {
                 row[currentCol] = newValue;
+                G[event.getTablePosition().getRow()][currentCol] = newValue;
+                updateParityCheckMatrixTable();
             } else {
                 showAlert("Invalid Input", "Please enter only 0 or 1.");
             }
@@ -179,7 +191,7 @@ public class FxUserInterface {
     private void inputImage() {
         try {
             String inputPath = inputField.getText();
-            String outputPath = "decoded_image_output.png";
+            String outputPath = "img/img_decoded" + inputPath.substring(inputPath.lastIndexOf('.'));
 
             ImageProcessor imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
             imageProcessor.processImage(inputPath, outputPath);

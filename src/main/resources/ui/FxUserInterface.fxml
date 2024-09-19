@@ -28,9 +28,6 @@
         <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
             <Button onAction="#processBlock" text="Process Block"/>
         </HBox>
-        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="3">
-            <Button onAction="#process" text="Process Whole"/>
-        </HBox>
         <columnConstraints>
             <ColumnConstraints/>
             <ColumnConstraints/>
@@ -41,8 +38,6 @@
         </rowConstraints>
     </GridPane>
 
-
-    <!-- Right Pane using GridPane for side-by-side display of matrices -->
     <GridPane hgap="10" minHeight="400.0" minWidth="500.0" prefHeight="400.0" prefWidth="406.0" vgap="10">
         <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
             <Label prefHeight="26.0" prefWidth="87.0" text="Columns (n):"/>
@@ -52,20 +47,14 @@
             <Button onAction="#generateMatrix" prefHeight="26.0" prefWidth="157.0" text="Generate New Matrix"/>
         </HBox>
 
-        <!-- Generating Matrix Display -->
         <VBox spacing="10" GridPane.rowIndex="1">
             <Label style="-fx-font-weight: bold;" text="Generating Matrix (G):"/>
-            <TableView fx:id="generatingMatrixTable" editable="true" prefHeight="200.0" prefWidth="280.0">
-                <!-- Columns will be dynamically added from the controller -->
-            </TableView>
+            <TableView fx:id="generatingMatrixTable" editable="true" prefHeight="200.0" prefWidth="280.0"/>
         </VBox>
 
-        <!-- Parity Check Matrix Display -->
         <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <Label style="-fx-font-weight: bold;" text="Parity Check Matrix (H):"/>
-            <TableView fx:id="parityCheckMatrixTable" editable="true" prefHeight="200" prefWidth="280.0">
-                <!-- Columns will be dynamically added from the controller -->
-            </TableView>
+            <TableView fx:id="parityCheckMatrixTable" editable="true" prefHeight="200" prefWidth="280.0"/>
         </VBox>
         <columnConstraints>
             <ColumnConstraints/>
