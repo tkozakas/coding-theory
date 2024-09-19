@@ -1,6 +1,9 @@
 # Do not exclude Main.jar
 !Main.jar
 
+# Libs
+javafx-sdk-21
+
 # Compiled class file
 *.class
 
