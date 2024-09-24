@@ -16,53 +16,40 @@ import java.util.Arrays;
 import java.util.List;
 
 public class FxUserInterface {
-    @FXML
-    private TableView<Integer[]> generatingMatrixTable;
-    @FXML
-    private TableView<Integer[]> parityCheckMatrixTable;
-    @FXML
+    public TableView<Integer[]> generatingMatrixTable;
+    public TableView<Integer[]> parityCheckMatrixTable;
     public TableView<CosetLeader> cosetLeaderTable;
 
-    @FXML
-    private ComboBox<String> inputTypeComboBox;
-    @FXML
-    private TextField columnsField;
-    @FXML
-    private TextField rowsField;
-    @FXML
-    private TextField totalCosetLeaders;
-    @FXML
-    private TextField inputField;
-    @FXML
-    private TextField blockTextField;
-    @FXML
-    private TextField encodedInputTextField;
-    @FXML
-    private TextField notEncodedInputTextField;
-    @FXML
-    private TextField receivedBitsEncodedTextField;
-    @FXML
-    private TextField receivedNotEncodedTextField;
-    @FXML
-    private TextField correctedEncodedTextField;
-    @FXML
-    private TextField correctedNotEncodedTextField;
-    @FXML
-    private TextField decodedEncodedTextField;
-    @FXML
-    private TextField decodedNotEncodedTextField;
-    @FXML
-    private Label errorLabel;
-    @FXML
-    private Label errorPositionLabel;
+    public ComboBox<String> inputTypeComboBox;
+
+    public TextField columnsField;
+    public TextField rowsField;
+    public TextField totalCosetLeaders;
+    public TextField inputField;
+    public TextField errorProbabilityField;
+    public TextField encodedInputTextField;
+    public TextField notEncodedInputTextField;
+    public TextField receivedBitsEncodedTextField;
+    public TextField receivedNotEncodedTextField;
+    public TextField correctedEncodedTextField;
+    public TextField correctedNotEncodedTextField;
+    public TextField decodedEncodedTextField;
+    public TextField decodedNotEncodedTextField;
+    public TextField alphabetSizeField;
+
+    public Label errorLabel;
+    public Label errorPositionLabel;
+    public Label blockLabel;
+    public Label probabilityLabel;
+    public Label alphabetLabel;
 
     private boolean debugMode = false;
     private EncoderDecoder encoderDecoder;
     private TextProcessor textProcessor;
     private ImageProcessor imageProcessor;
 
-    private final double pe = 0.0001; // Probability of error
-    private final int q = 2; // Number of symbols in the alphabet
+    private double pe = 0.0001; // Probability of error
+    private int q = 2; // Number of symbols in the alphabet
 
     private int[][] G;
     private int[][] H;
@@ -81,6 +68,8 @@ public class FxUserInterface {
     private void initialize() {
         inputTypeComboBox.getSelectionModel().selectFirst();
         encoderDecoder = new EncoderDecoder();
+        alphabetLabel.setText("Alphabet (q): " + q);
+        probabilityLabel.setText("Error Probability (%): " + pe);
     }
 
     private void updateMatrix() {
@@ -240,7 +229,7 @@ public class FxUserInterface {
             notEncodedBits = getBlockFromInputBits();
             encodedBits = encoderDecoder.encode(notEncodedBits, G);
 
-            blockTextField.setText(Arrays.toString(notEncodedBits));
+            blockLabel.setText("Block (m): " + Arrays.toString(notEncodedBits));
             encodedInputTextField.setText(Arrays.toString(encodedBits));
             notEncodedInputTextField.setText(Arrays.toString(notEncodedBits));
         } catch (Exception e) {
@@ -258,8 +247,8 @@ public class FxUserInterface {
             receivedBitsForEncoded = encoderDecoder.introduceErrors(encodedBits, pe, q);
             receivedBitsForNotEncoded = encoderDecoder.introduceErrors(notEncodedBits, pe, q);
 
-            errorLabel.setText(String.valueOf(encoderDecoder.getIntroducedErrors()));
-            errorPositionLabel.setText(encoderDecoder.getErrorPositions().toString());
+            errorLabel.setText("Errors: " + encoderDecoder.getIntroducedErrors());
+            errorPositionLabel.setText("Error Positions: " + encoderDecoder.getErrorPositions().toString());
             receivedBitsEncodedTextField.setText(Arrays.toString(receivedBitsForEncoded));
             receivedNotEncodedTextField.setText(Arrays.toString(receivedBitsForNotEncoded));
         } catch (Exception e) {
@@ -326,5 +315,23 @@ public class FxUserInterface {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void setProbability() {
+        try {
+            pe = Double.parseDouble(errorProbabilityField.getText());
+            probabilityLabel.setText("Error Probability (%): " + pe);
+        } catch (NumberFormatException e) {
+            showAlert("Invalid input", "Please enter a valid number for the probability of error.");
+        }
+    }
+
+    public void setAlphabetSize() {
+        try {
+            q = Integer.parseInt(alphabetSizeField.getText());
+            alphabetLabel.setText("Alphabet (q): " + q);
+        } catch (NumberFormatException e) {
+            showAlert("Invalid input", "Please enter a valid number for the alphabet size.");
+        }
     }
 }
