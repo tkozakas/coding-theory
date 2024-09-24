@@ -293,6 +293,9 @@ public class FxUserInterface {
     @FXML
     public void decodeBlock() {
         try {
+            receivedBitsForEncoded = parseInputToBits(receivedBitsEncodedTextField);
+            receivedBitsForNotEncoded = parseInputToBits(receivedNotEncodedTextField);
+
             correctedEncoded = encoderDecoder.decode(receivedBitsForEncoded, H, encoderDecoder.findCosetLeaders(H));
             correctedNotEncoded = encoderDecoder.decode(receivedBitsForNotEncoded, H, encoderDecoder.findCosetLeaders(H));
 
@@ -323,6 +326,14 @@ public class FxUserInterface {
         }
         currentBitPosition = 0;
     }
+
+    private int[] parseInputToBits(TextField inputField) {
+        String input = inputField.getText();
+        return Arrays.stream(input.replaceAll("[\\[\\]]", "").split(",\\s*"))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+    }
+
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

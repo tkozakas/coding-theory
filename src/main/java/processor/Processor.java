@@ -38,7 +38,7 @@ public class Processor {
         return decodedText;
     }
 
-    public void processBlock(int[] m, int k) {
+    public int[] processBlock(int[] m, int k) {
         c = encoderDecoder.encode(m, G);
         r = encoderDecoder.introduceErrors(c, pe, q);
         int[][] H = encoderDecoder.generateParityCheckMatrix(G);
@@ -46,6 +46,7 @@ public class Processor {
         corrected = encoderDecoder.decode(r, H, cosetLeaders);
         decoded = new int[k];
         System.arraycopy(corrected, 0, decoded, 0, k);
+        return decoded;
     }
 
     public int[] getR() {

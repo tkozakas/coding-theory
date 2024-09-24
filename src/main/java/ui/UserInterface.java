@@ -173,7 +173,7 @@ public class UserInterface {
                     }
                     testVector = Arrays.copyOfRange(testVector, 0, count);
                     Processor processor = new Processor(encoderDecoder, G, pe, q);
-                    processor.processBlock(testVector, k);
+                    int[] decoded = processor.processBlock(testVector, k);
 
                     long endTime = System.nanoTime();
 
@@ -209,7 +209,8 @@ public class UserInterface {
         }
 
         processor = new Processor(encoderDecoder, G, pe, q);
-        processor.processBlock(m, k);
+        int[] decoded = processor.processBlock(m, k);
+        System.out.println("Decoded message: " + Arrays.toString(decoded));
     }
 
     private void inputText() {
@@ -217,16 +218,16 @@ public class UserInterface {
         String text = scanner.nextLine();
 
         textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
-        textProcessor.getBitRepresentation(text);
+        int[] bits = textProcessor.getBitRepresentation(text);
+        // TODO: Implement text processing
     }
 
     private void inputImage() {
         System.out.println("Enter the path to the image file:");
         String inputPath = scanner.nextLine();
-        System.out.println("Enter the output path for the decoded image:");
-        String outputPath = scanner.nextLine();
 
         imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
-        imageProcessor.getBitRepresentation(inputPath);
+        int[] bits = imageProcessor.getBitRepresentation(inputPath);
+        // TODO: Implement image processing
     }
 }

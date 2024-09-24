@@ -7,202 +7,187 @@
 <?import java.lang.String?>
 <SplitPane dividerPositions="0.3" prefHeight="700" prefWidth="500" xmlns="http://javafx.com/javafx/22"
            xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.FxUserInterface">
-    <GridPane hgap="10" minHeight="400.0" minWidth="400.0" prefHeight="400.0" prefWidth="400.0" vgap="10">
-        <GridPane minHeight="600.0" minWidth="400.0" prefHeight="600.0" prefWidth="400.0" vgap="10">
-            <ComboBox fx:id="inputTypeComboBox" onAction="#handleInputTypeSelection" prefHeight="26.0"
-                      prefWidth="113.0">
-                <items>
-                    <FXCollections fx:factory="observableArrayList">
-                        <String fx:value="Vector"/>
-                        <String fx:value="Text"/>
-                        <String fx:value="Image"/>
-                    </FXCollections>
-                </items>
-                <GridPane.margin>
-                    <Insets left="5.0" right="10.0" top="10.0"/>
-                </GridPane.margin>
-            </ComboBox>
-
-            <TextField fx:id="inputField" prefHeight="26.0" prefWidth="268.0" promptText="Enter vector"
-                       GridPane.columnIndex="1">
-                <GridPane.margin>
-                    <Insets left="5.0" right="10.0" top="10.0"/>
-                </GridPane.margin>
-            </TextField>
-
-            <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="3">
-                <Label text="Block (m):">
-                    <padding>
-                        <Insets left="10.0"/>
-                    </padding>
-                </Label>
-                <HBox spacing="20">
-                    <TextField fx:id="blockTextField" prefHeight="26.0" prefWidth="268.0" promptText="Enter block">
-                        <HBox.margin>
-                            <Insets left="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                </HBox>
-            </VBox>
-
-            <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="4"/>
-
-            <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="5">
-                <Label text="Encoded vs. Not Encoded">
-                    <padding>
-                        <Insets left="10.0"/>
-                    </padding>
-                </Label>
-                <HBox spacing="20">
-                    <TextField fx:id="encodedInputTextField" prefHeight="26.0" prefWidth="180.0" promptText="Encoded">
-                        <HBox.margin>
-                            <Insets left="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                    <TextField fx:id="notEncodedInputTextField" prefHeight="26.0" prefWidth="180.0"
-                               promptText="Not Encoded">
-                        <HBox.margin>
-                            <Insets left="10.0" right="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                </HBox>
-            </VBox>
-
-            <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="6">
-                <Button minWidth="80" onAction="#sendBlock" text="Send">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </Button>
-            </HBox>
-
-            <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="7">
-                <Label text="With error vs. Corrected">
-                    <padding>
-                        <Insets left="10.0"/>
-                    </padding>
-                </Label>
-                <HBox spacing="20">
-                    <TextField fx:id="receivedBitsEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                               promptText="With Error">
-                        <HBox.margin>
-                            <Insets left="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                    <TextField fx:id="receivedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                               promptText="Corrected">
-                        <HBox.margin>
-                            <Insets left="10.0" right="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                </HBox>
-            </VBox>
-
-            <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="8">
-                <Button minWidth="80" onAction="#decodeBlock" text="Decode">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </Button>
-            </HBox>
-
-            <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="9">
-                <Label text="Corrected Encoded vs. Corrected Not Encoded">
-                    <padding>
-                        <Insets left="10.0"/>
-                    </padding>
-                </Label>
-                <HBox spacing="20">
-                    <TextField fx:id="correctedEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                               promptText="Corrected Encoded">
-                        <HBox.margin>
-                            <Insets left="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                    <TextField fx:id="correctedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                               promptText="Corrected Not Encoded">
-                        <HBox.margin>
-                            <Insets left="10.0" right="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                </HBox>
-            </VBox>
-
-            <VBox prefHeight="52.0" prefWidth="381.0" spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="10">
-                <Label text="Decoded vs. Original">
-                    <padding>
-                        <Insets left="10.0"/>
-                    </padding>
-                </Label>
-                <HBox spacing="20">
-                    <TextField fx:id="decodedEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                               promptText="Decoded Encoded">
-                        <HBox.margin>
-                            <Insets left="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                    <TextField fx:id="decodedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                               promptText="Decoded Not Encoded">
-                        <HBox.margin>
-                            <Insets left="10.0" right="10.0"/>
-                        </HBox.margin>
-                    </TextField>
-                </HBox>
-            </VBox>
-
-            <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="11">
-                <Button minWidth="120" onAction="#toggleDebugMode" prefWidth="120" text="Toggle Debug">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </Button>
-                <Button minWidth="120" onAction="#processBlock" prefWidth="120" text="Process"/>
-            </HBox>
-            <Button minWidth="80" onAction="#encodeBlock" prefHeight="21.0" prefWidth="80.0" text="Encode"
-                    GridPane.rowIndex="2">
-                <GridPane.margin>
-                    <Insets left="10.0"/>
-                </GridPane.margin>
-            </Button>
-
-            <columnConstraints>
-                <ColumnConstraints/>
-                <ColumnConstraints/>
-                <ColumnConstraints/>
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints/>
-                <RowConstraints/>
-                <RowConstraints minHeight="28.0"/>
-                <RowConstraints maxHeight="60.0" minHeight="60.0" prefHeight="60.0"/>
-                <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0"/>
-                <RowConstraints maxHeight="60.0" minHeight="60.0" prefHeight="60.0"/>
-                <RowConstraints maxHeight="100.0" minHeight="28.0" prefHeight="32.0"/>
-                <RowConstraints minHeight="60.0"/>
-                <RowConstraints maxHeight="132.0" minHeight="28.0" prefHeight="36.0"/>
-                <RowConstraints minHeight="60.0"/>
-                <RowConstraints minHeight="60.0"/>
-                <RowConstraints maxHeight="117.0" minHeight="28.0" prefHeight="63.0"/>
-                <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
-                <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
-                <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
-                <RowConstraints/>
-            </rowConstraints>
-        </GridPane>
+    <GridPane minHeight="600.0" minWidth="400.0" prefHeight="600.0" prefWidth="400.0" vgap="10"
+              xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
         <columnConstraints>
+            <ColumnConstraints/>
             <ColumnConstraints/>
             <ColumnConstraints/>
         </columnConstraints>
         <rowConstraints>
-            <RowConstraints maxHeight="600.0" minHeight="600.0" prefHeight="600.0"/>
+            <RowConstraints minHeight="38.0"/>
+            <RowConstraints/>
+            <RowConstraints minHeight="28.0"/>
+            <RowConstraints minHeight="60.0"/>
             <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0"/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
-            <RowConstraints/>
+            <RowConstraints minHeight="60.0"/>
+            <RowConstraints maxHeight="100.0" minHeight="28.0" prefHeight="32.0"/>
+            <RowConstraints minHeight="60.0"/>
+            <RowConstraints minHeight="28.0"/>
+            <RowConstraints minHeight="60.0"/>
+            <RowConstraints minHeight="60.0"/>
+            <RowConstraints minHeight="28.0"/>
+            <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
+            <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
+            <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
             <RowConstraints/>
         </rowConstraints>
+
+        <ComboBox fx:id="inputTypeComboBox" onAction="#handleInputTypeSelection" prefHeight="26.0" prefWidth="113.0">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Vector"/>
+                    <String fx:value="Text"/>
+                    <String fx:value="Image"/>
+                </FXCollections>
+            </items>
+            <GridPane.margin>
+                <Insets left="5.0" right="10.0" top="10.0"/>
+            </GridPane.margin>
+        </ComboBox>
+
+        <TextField fx:id="inputField" prefHeight="26.0" prefWidth="268.0" promptText="Enter vector"
+                   GridPane.columnIndex="1">
+            <GridPane.margin>
+                <Insets left="5.0" right="10.0" top="10.0"/>
+            </GridPane.margin>
+        </TextField>
+
+        <Button minWidth="80" onAction="#encodeBlock" prefHeight="21.0" prefWidth="80.0" text="Encode"
+                GridPane.rowIndex="2">
+            <GridPane.margin>
+                <Insets left="10.0"/>
+            </GridPane.margin>
+        </Button>
+
+        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="3">
+            <Label text="Block (m):">
+                <padding>
+                    <Insets left="10.0"/>
+                </padding>
+            </Label>
+            <HBox spacing="20">
+                <TextField fx:id="blockTextField" prefHeight="26.0" prefWidth="268.0" promptText="Enter block">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </TextField>
+            </HBox>
+        </VBox>
+
+        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="4"/>
+
+        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="5">
+            <Label text="Encoded vs. Not Encoded">
+                <padding>
+                    <Insets left="10.0"/>
+                </padding>
+            </Label>
+            <HBox spacing="20">
+                <TextField fx:id="encodedInputTextField" prefHeight="26.0" prefWidth="180.0" promptText="Encoded">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </TextField>
+                <TextField fx:id="notEncodedInputTextField" prefHeight="26.0" prefWidth="180.0"
+                           promptText="Not Encoded">
+                    <HBox.margin>
+                        <Insets left="10.0" right="10.0"/>
+                    </HBox.margin>
+                </TextField>
+            </HBox>
+        </VBox>
+
+        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="6">
+            <Button minWidth="80" onAction="#sendBlock" text="Send">
+                <HBox.margin>
+                    <Insets left="10.0"/>
+                </HBox.margin>
+            </Button>
+        </HBox>
+
+        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="7">
+            <Label text="With error vs. Corrected">
+                <padding>
+                    <Insets left="10.0"/>
+                </padding>
+            </Label>
+            <HBox spacing="20">
+                <TextField fx:id="receivedBitsEncodedTextField" prefHeight="26.0" prefWidth="180.0"
+                           promptText="With Error">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </TextField>
+                <TextField fx:id="receivedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
+                           promptText="Corrected">
+                    <HBox.margin>
+                        <Insets left="10.0" right="10.0"/>
+                    </HBox.margin>
+                </TextField>
+            </HBox>
+        </VBox>
+
+        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="8">
+            <Button minWidth="80" onAction="#decodeBlock" text="Decode">
+                <HBox.margin>
+                    <Insets left="10.0"/>
+                </HBox.margin>
+            </Button>
+        </HBox>
+
+        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="9">
+            <Label text="Corrected Encoded vs. Corrected Not Encoded">
+                <padding>
+                    <Insets left="10.0"/>
+                </padding>
+            </Label>
+            <HBox spacing="20">
+                <TextField fx:id="correctedEncodedTextField" prefHeight="26.0" prefWidth="180.0"
+                           promptText="Corrected Encoded">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </TextField>
+                <TextField fx:id="correctedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
+                           promptText="Corrected Not Encoded">
+                    <HBox.margin>
+                        <Insets left="10.0" right="10.0"/>
+                    </HBox.margin>
+                </TextField>
+            </HBox>
+        </VBox>
+
+        <VBox prefHeight="52.0" prefWidth="381.0" spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="10">
+            <Label text="Decoded vs. Original">
+                <padding>
+                    <Insets left="10.0"/>
+                </padding>
+            </Label>
+            <HBox spacing="20">
+                <TextField fx:id="decodedEncodedTextField" prefHeight="26.0" prefWidth="180.0"
+                           promptText="Decoded Encoded">
+                    <HBox.margin>
+                        <Insets left="10.0"/>
+                    </HBox.margin>
+                </TextField>
+                <TextField fx:id="decodedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
+                           promptText="Decoded Not Encoded">
+                    <HBox.margin>
+                        <Insets left="10.0" right="10.0"/>
+                    </HBox.margin>
+                </TextField>
+            </HBox>
+        </VBox>
+
+        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="11">
+            <Button minWidth="120" onAction="#toggleDebugMode" prefWidth="120" text="Toggle Debug">
+                <HBox.margin>
+                    <Insets left="10.0"/>
+                </HBox.margin>
+            </Button>
+            <Button minWidth="120" onAction="#processBlock" prefWidth="120" text="Process"/>
+        </HBox>
     </GridPane>
 
     <GridPane hgap="20" minHeight="700.0" minWidth="500.0" prefHeight="700.0" prefWidth="500.0" vgap="10">
