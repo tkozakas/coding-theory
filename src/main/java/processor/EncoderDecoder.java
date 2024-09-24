@@ -8,7 +8,7 @@ public class EncoderDecoder {
     private final Random random = new Random();
     private boolean debug;
     private int introducedErrors = 0;
-    private List<Integer> errorPositions;
+    private final List<Integer> errorPositions = new ArrayList<>();
 
     /**
      * Encodes a message using the generator matrix G.
@@ -282,19 +282,24 @@ public class EncoderDecoder {
         return introducedErrors;
     }
 
-    public void setDebug(boolean debug) {
-        this.debug = debug;
+    public List<Integer> getErrorPositions() {
+        return errorPositions;
     }
 
     public boolean isDebug() {
         return debug;
     }
 
-    public void setIntroducedErrors(int introducedErrors) {
-        this.introducedErrors = introducedErrors;
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
-    public List<Integer> getErrorPositions() {
-        return errorPositions;
+    public void clearErrorPositions() {
+        errorPositions.clear();
+    }
+
+    public void clearErrors() {
+        introducedErrors = 0;
     }
 }

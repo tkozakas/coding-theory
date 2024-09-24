@@ -51,9 +51,9 @@
             <Button onAction="#setAlphabetSize" prefWidth="120" text="Set" />
         </HBox>
         <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="3">
-            <Label fx:id="probabilityLabel" text="Probability (%): -" />
+            <Label fx:id="probabilityLabel" text="Probability (p): -" />
             <Label fx:id="alphabetLabel" text="Alphabet (q): 0" />
-            <Label fx:id="blockLabel" text="Block (m): -" />
+            <Label fx:id="blockLabel" text="Current Block (m): -" />
         </VBox>
 
         <Button onAction="#encodeBlock" prefWidth="100" text="Encode" GridPane.columnIndex="1" GridPane.rowIndex="4" />
@@ -95,7 +95,11 @@
             <TextField fx:id="decodedNotEncodedTextField" prefWidth="155" promptText="Decoded Not Encoded" />
         </HBox>
 
-        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="16">
+        <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="16">
+            <Label fx:id="decodedTextLabel" text="Decoded Text: -" />
+        </VBox>
+
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="17">
             <Button onAction="#toggleDebugMode" prefWidth="120" text="Toggle Debug" />
             <Button onAction="#processBlock" prefWidth="120" text="Process" />
         </HBox>

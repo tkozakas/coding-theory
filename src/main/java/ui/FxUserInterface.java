@@ -9,9 +9,11 @@ import javafx.util.converter.IntegerStringConverter;
 import model.CosetLeader;
 import processor.EncoderDecoder;
 import processor.ImageProcessor;
+import processor.Processor;
 import processor.TextProcessor;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,6 +44,7 @@ public class FxUserInterface {
     public Label blockLabel;
     public Label probabilityLabel;
     public Label alphabetLabel;
+    public Label decodedTextLabel;
 
     private boolean debugMode = false;
     private EncoderDecoder encoderDecoder;
@@ -64,12 +67,14 @@ public class FxUserInterface {
     private int[] receivedBitsForEncoded;
     private int[] receivedBitsForNotEncoded;
 
+    private final List<int[]> decodedBlocks = new ArrayList<>();
+
     @FXML
     private void initialize() {
         inputTypeComboBox.getSelectionModel().selectFirst();
         encoderDecoder = new EncoderDecoder();
         alphabetLabel.setText("Alphabet (q): " + q);
-        probabilityLabel.setText("Error Probability (%): " + pe);
+        probabilityLabel.setText("Error Probability (p): " + pe);
     }
 
     private void updateMatrix() {
@@ -219,17 +224,14 @@ public class FxUserInterface {
         };
     }
 
-    /**
-     * Handles the "Encode" button action.
-     * Encodes the input block and displays encoded and not encoded vectors.
-     */
     @FXML
     public void encodeBlock() {
         try {
+            clearResults();
             notEncodedBits = getBlockFromInputBits();
             encodedBits = encoderDecoder.encode(notEncodedBits, G);
 
-            blockLabel.setText("Block (m): " + Arrays.toString(notEncodedBits));
+            blockLabel.setText("Current Block (m): " + Arrays.toString(notEncodedBits));
             encodedInputTextField.setText(Arrays.toString(encodedBits));
             notEncodedInputTextField.setText(Arrays.toString(notEncodedBits));
         } catch (Exception e) {
@@ -237,10 +239,6 @@ public class FxUserInterface {
         }
     }
 
-    /**
-     * Handles the "Send" button action.
-     * Simulates sending the encoded block through a noisy channel and displays the received and original blocks.
-     */
     @FXML
     public void sendBlock() {
         try {
@@ -256,10 +254,6 @@ public class FxUserInterface {
         }
     }
 
-    /**
-     * Handles the "Decode" button action.
-     * Decodes the received block, corrects errors, and displays the corrected and decoded blocks.
-     */
     @FXML
     public void decodeBlock() {
         try {
@@ -275,6 +269,8 @@ public class FxUserInterface {
             int[] decodedNotEncodedBits = new int[k];
             System.arraycopy(correctedNotEncoded, 0, decodedNotEncodedBits, 0, k);
 
+            decodedBlocks.add(decodedEncodedBits);
+            decodedTextLabel.setText("Decoded Text: " + getDecodedText());
             correctedEncodedTextField.setText(Arrays.toString(correctedEncoded));
             correctedNotEncodedTextField.setText(Arrays.toString(correctedNotEncoded));
             decodedEncodedTextField.setText(Arrays.toString(decodedEncodedBits));
@@ -284,9 +280,14 @@ public class FxUserInterface {
         }
     }
 
-    /**
-     * Processes all steps (encode, send, decode) at once for all blocks.
-     */
+    private String getDecodedText() {
+        StringBuilder decodedText = new StringBuilder();
+        for (int[] block : decodedBlocks) {
+            decodedText.append(Processor.getStringFromBits(block));
+        }
+        return decodedText.toString();
+    }
+
     @FXML
     public void processBlock() {
         if (debugMode) {
@@ -333,5 +334,18 @@ public class FxUserInterface {
         } catch (NumberFormatException e) {
             showAlert("Invalid input", "Please enter a valid number for the alphabet size.");
         }
+    }
+
+    private void clearResults() {
+        receivedBitsEncodedTextField.clear();
+        receivedNotEncodedTextField.clear();
+        correctedEncodedTextField.clear();
+        correctedNotEncodedTextField.clear();
+        decodedEncodedTextField.clear();
+        decodedNotEncodedTextField.clear();
+        decodedTextLabel.setText("Decoded Text:");
+        currentBitPosition = 0;
+        encoderDecoder.clearErrors();
+        encoderDecoder.clearErrorPositions();
     }
 }
