@@ -177,7 +177,7 @@ public class UserInterface {
 
                     long endTime = System.nanoTime();
 
-                    if (processor.getDecoded() == null || processor.getDecoded().length == 0) {
+                    if (decoded == null || decoded.length == 0) {
                         continue;
                     }
 

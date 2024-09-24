@@ -17,6 +17,13 @@ import java.util.List;
 
 public class FxUserInterface {
     @FXML
+    private TableView<Integer[]> generatingMatrixTable;
+    @FXML
+    private TableView<Integer[]> parityCheckMatrixTable;
+    @FXML
+    public TableView<CosetLeader> cosetLeaderTable;
+
+    @FXML
     private ComboBox<String> inputTypeComboBox;
     @FXML
     private TextField columnsField;
@@ -24,42 +31,30 @@ public class FxUserInterface {
     private TextField rowsField;
     @FXML
     private TextField totalCosetLeaders;
-
-    @FXML
-    private TableView<Integer[]> generatingMatrixTable;
-    @FXML
-    private TableView<Integer[]> parityCheckMatrixTable;
-    @FXML
-    public TableView<CosetLeader> cosetLeaderTable;
-
-
-    //===============================================================================================================
     @FXML
     private TextField inputField;
-    //===============================================================================================================
     @FXML
     private TextField blockTextField;
-    //===============================================================================================================
     @FXML
     private TextField encodedInputTextField;
     @FXML
     private TextField notEncodedInputTextField;
-    //===============================================================================================================
     @FXML
     private TextField receivedBitsEncodedTextField;
     @FXML
     private TextField receivedNotEncodedTextField;
-    //===============================================================================================================
     @FXML
     private TextField correctedEncodedTextField;
     @FXML
     private TextField correctedNotEncodedTextField;
-    //===============================================================================================================
     @FXML
     private TextField decodedEncodedTextField;
     @FXML
     private TextField decodedNotEncodedTextField;
-    //===============================================================================================================
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private Label errorPositionLabel;
 
     private boolean debugMode = false;
     private EncoderDecoder encoderDecoder;
@@ -81,12 +76,6 @@ public class FxUserInterface {
 
     private int[] receivedBitsForEncoded;
     private int[] receivedBitsForNotEncoded;
-
-    private int[] correctedEncoded;
-    private int[] correctedNotEncoded;
-
-    private int[] decodedEncodedBits;
-    private int[] decodedNotEncodedBits;
 
     @FXML
     private void initialize() {
@@ -233,22 +222,12 @@ public class FxUserInterface {
 
     private int[] getBitsFromInput() {
         String input = inputField.getText();
-        switch (inputTypeComboBox.getValue()) {
-            case "Vector" -> {
-                return Arrays.stream(input.split("\\s+"))
-                        .mapToInt(Integer::parseInt)
-                        .toArray();
-            }
-            case "Text" -> {
-                return textProcessor.getBitRepresentation(input);
-            }
-            case "Image" -> {
-                return imageProcessor.getBitRepresentation(input);
-            }
-            default -> {
-                return new int[0];
-            }
-        }
+        return switch (inputTypeComboBox.getValue()) {
+            case "Vector" -> parseInputToBits(inputField);
+            case "Text" -> textProcessor.getBitRepresentation(input);
+            case "Image" -> imageProcessor.getBitRepresentation(input);
+            default -> new int[0];
+        };
     }
 
     /**
@@ -279,6 +258,8 @@ public class FxUserInterface {
             receivedBitsForEncoded = encoderDecoder.introduceErrors(encodedBits, pe, q);
             receivedBitsForNotEncoded = encoderDecoder.introduceErrors(notEncodedBits, pe, q);
 
+            errorLabel.setText(String.valueOf(encoderDecoder.getIntroducedErrors()));
+            errorPositionLabel.setText(encoderDecoder.getErrorPositions().toString());
             receivedBitsEncodedTextField.setText(Arrays.toString(receivedBitsForEncoded));
             receivedNotEncodedTextField.setText(Arrays.toString(receivedBitsForNotEncoded));
         } catch (Exception e) {
@@ -296,13 +277,13 @@ public class FxUserInterface {
             receivedBitsForEncoded = parseInputToBits(receivedBitsEncodedTextField);
             receivedBitsForNotEncoded = parseInputToBits(receivedNotEncodedTextField);
 
-            correctedEncoded = encoderDecoder.decode(receivedBitsForEncoded, H, encoderDecoder.findCosetLeaders(H));
-            correctedNotEncoded = encoderDecoder.decode(receivedBitsForNotEncoded, H, encoderDecoder.findCosetLeaders(H));
+            int[] correctedEncoded = encoderDecoder.decode(receivedBitsForEncoded, H, encoderDecoder.findCosetLeaders(H));
+            int[] correctedNotEncoded = encoderDecoder.decode(receivedBitsForNotEncoded, H, encoderDecoder.findCosetLeaders(H));
 
-            decodedEncodedBits = new int[k];
+            int[] decodedEncodedBits = new int[k];
             System.arraycopy(correctedEncoded, 0, decodedEncodedBits, 0, k);
 
-            decodedNotEncodedBits = new int[k];
+            int[] decodedNotEncodedBits = new int[k];
             System.arraycopy(correctedNotEncoded, 0, decodedNotEncodedBits, 0, k);
 
             correctedEncodedTextField.setText(Arrays.toString(correctedEncoded));
@@ -319,12 +300,17 @@ public class FxUserInterface {
      */
     @FXML
     public void processBlock() {
-        while (currentBitPosition < getBitsFromInput().length) {
+        if (debugMode) {
             encodeBlock();
             sendBlock();
             decodeBlock();
+        } else {
+            while (currentBitPosition < getBitsFromInput().length) {
+                encodeBlock();
+                sendBlock();
+                decodeBlock();
+            }
         }
-        currentBitPosition = 0;
     }
 
     private int[] parseInputToBits(TextField inputField) {
@@ -333,7 +319,6 @@ public class FxUserInterface {
                 .mapToInt(Integer::parseInt)
                 .toArray();
     }
-
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

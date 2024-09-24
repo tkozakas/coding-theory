@@ -7,296 +7,120 @@
 <?import java.lang.String?>
 <SplitPane dividerPositions="0.3" prefHeight="700" prefWidth="500" xmlns="http://javafx.com/javafx/22"
            xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.FxUserInterface">
-    <GridPane minHeight="600.0" minWidth="400.0" prefHeight="600.0" prefWidth="400.0" vgap="10"
-              xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1">
+    <GridPane xmlns="http://javafx.com/javafx"
+              xmlns:fx="http://javafx.com/fxml/1"
+              hgap="10"
+              vgap="10">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
         <columnConstraints>
-            <ColumnConstraints/>
-            <ColumnConstraints/>
-            <ColumnConstraints/>
+            <ColumnConstraints minWidth="100" prefWidth="150"/>
+            <ColumnConstraints minWidth="200" prefWidth="250"/>
         </columnConstraints>
-        <rowConstraints>
-            <RowConstraints minHeight="38.0"/>
-            <RowConstraints/>
-            <RowConstraints minHeight="28.0"/>
-            <RowConstraints minHeight="60.0"/>
-            <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0"/>
-            <RowConstraints minHeight="60.0"/>
-            <RowConstraints maxHeight="100.0" minHeight="28.0" prefHeight="32.0"/>
-            <RowConstraints minHeight="60.0"/>
-            <RowConstraints minHeight="28.0"/>
-            <RowConstraints minHeight="60.0"/>
-            <RowConstraints minHeight="60.0"/>
-            <RowConstraints minHeight="28.0"/>
-            <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
-            <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
-            <RowConstraints maxHeight="53.0" minHeight="6.0" prefHeight="53.0"/>
-            <RowConstraints/>
-        </rowConstraints>
 
-        <ComboBox fx:id="inputTypeComboBox" onAction="#handleInputTypeSelection" prefHeight="26.0" prefWidth="113.0">
-            <items>
-                <FXCollections fx:factory="observableArrayList">
-                    <String fx:value="Vector"/>
-                    <String fx:value="Text"/>
-                    <String fx:value="Image"/>
-                </FXCollections>
-            </items>
-            <GridPane.margin>
-                <Insets left="5.0" right="10.0" top="10.0"/>
-            </GridPane.margin>
-        </ComboBox>
-
-        <TextField fx:id="inputField" prefHeight="26.0" prefWidth="268.0" promptText="Enter vector"
-                   GridPane.columnIndex="1">
-            <GridPane.margin>
-                <Insets left="5.0" right="10.0" top="10.0"/>
-            </GridPane.margin>
-        </TextField>
-
-        <Button minWidth="80" onAction="#encodeBlock" prefHeight="21.0" prefWidth="80.0" text="Encode"
-                GridPane.rowIndex="2">
-            <GridPane.margin>
-                <Insets left="10.0"/>
-            </GridPane.margin>
-        </Button>
-
-        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="3">
-            <Label text="Block (m):">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <HBox spacing="20">
-                <TextField fx:id="blockTextField" prefHeight="26.0" prefWidth="268.0" promptText="Enter block">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </TextField>
-            </HBox>
-        </VBox>
-
-        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="4"/>
-
-        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="5">
-            <Label text="Encoded vs. Not Encoded">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <HBox spacing="20">
-                <TextField fx:id="encodedInputTextField" prefHeight="26.0" prefWidth="180.0" promptText="Encoded">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </TextField>
-                <TextField fx:id="notEncodedInputTextField" prefHeight="26.0" prefWidth="180.0"
-                           promptText="Not Encoded">
-                    <HBox.margin>
-                        <Insets left="10.0" right="10.0"/>
-                    </HBox.margin>
-                </TextField>
-            </HBox>
-        </VBox>
-
-        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="6">
-            <Button minWidth="80" onAction="#sendBlock" text="Send">
-                <HBox.margin>
-                    <Insets left="10.0"/>
-                </HBox.margin>
-            </Button>
+        <Label text="Input:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <HBox spacing="10" GridPane.rowIndex="0" GridPane.columnIndex="1">
+            <ComboBox fx:id="inputTypeComboBox" onAction="#handleInputTypeSelection" prefWidth="120">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Vector"/>
+                        <String fx:value="Text"/>
+                        <String fx:value="Image"/>
+                    </FXCollections>
+                </items>
+            </ComboBox>
+            <TextField fx:id="inputField" promptText="Enter vector" prefWidth="200"/>
         </HBox>
 
-        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="7">
-            <Label text="With error vs. Corrected">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <HBox spacing="20">
-                <TextField fx:id="receivedBitsEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                           promptText="With Error">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </TextField>
-                <TextField fx:id="receivedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                           promptText="Corrected">
-                    <HBox.margin>
-                        <Insets left="10.0" right="10.0"/>
-                    </HBox.margin>
-                </TextField>
-            </HBox>
-        </VBox>
+        <Button text="Encode" onAction="#encodeBlock" prefWidth="100" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="8">
-            <Button minWidth="80" onAction="#decodeBlock" text="Decode">
-                <HBox.margin>
-                    <Insets left="10.0"/>
-                </HBox.margin>
-            </Button>
+        <Label text="Block (m):" style="-fx-font-weight: bold;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="blockTextField" promptText="Enter block" prefWidth="320" GridPane.rowIndex="2"
+                   GridPane.columnIndex="1"/>
+
+        <Label text="Encoded vs. Not Encoded" style="-fx-font-weight: bold;" GridPane.rowIndex="3"
+               GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <HBox spacing="10" GridPane.rowIndex="4" GridPane.columnIndex="1">
+            <TextField fx:id="encodedInputTextField" promptText="Encoded" prefWidth="155"/>
+            <TextField fx:id="notEncodedInputTextField" promptText="Not Encoded" prefWidth="155"/>
         </HBox>
 
-        <VBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="9">
-            <Label text="Corrected Encoded vs. Corrected Not Encoded">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <HBox spacing="20">
-                <TextField fx:id="correctedEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                           promptText="Corrected Encoded">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </TextField>
-                <TextField fx:id="correctedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                           promptText="Corrected Not Encoded">
-                    <HBox.margin>
-                        <Insets left="10.0" right="10.0"/>
-                    </HBox.margin>
-                </TextField>
-            </HBox>
-        </VBox>
+        <Button text="Send" onAction="#sendBlock" prefWidth="100" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-        <VBox prefHeight="52.0" prefWidth="381.0" spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="10">
-            <Label text="Decoded vs. Original">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <HBox spacing="20">
-                <TextField fx:id="decodedEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                           promptText="Decoded Encoded">
-                    <HBox.margin>
-                        <Insets left="10.0"/>
-                    </HBox.margin>
-                </TextField>
-                <TextField fx:id="decodedNotEncodedTextField" prefHeight="26.0" prefWidth="180.0"
-                           promptText="Decoded Not Encoded">
-                    <HBox.margin>
-                        <Insets left="10.0" right="10.0"/>
-                    </HBox.margin>
-                </TextField>
-            </HBox>
-        </VBox>
+        <Label text="With Error vs. Corrected" style="-fx-font-weight: bold;" GridPane.rowIndex="6"
+               GridPane.columnIndex="0" GridPane.columnSpan="2"/>
 
-        <HBox spacing="10" GridPane.columnSpan="2" GridPane.rowIndex="11">
-            <Button minWidth="120" onAction="#toggleDebugMode" prefWidth="120" text="Toggle Debug">
-                <HBox.margin>
-                    <Insets left="10.0"/>
-                </HBox.margin>
-            </Button>
-            <Button minWidth="120" onAction="#processBlock" prefWidth="120" text="Process"/>
+        <HBox spacing="10" GridPane.rowIndex="7" GridPane.columnIndex="1">
+            <TextField fx:id="receivedBitsEncodedTextField" promptText="With Error" prefWidth="155"/>
+            <TextField fx:id="receivedNotEncodedTextField" promptText="Corrected" prefWidth="155"/>
         </HBox>
+
+        <VBox spacing="5" GridPane.rowIndex="8" GridPane.columnIndex="1">
+            <Label fx:id="errorLabel" text="Errors: 0"/>
+            <Label fx:id="errorPositionLabel" text="Error Position: -"/>
+        </VBox>
+
+        <Button text="Decode" onAction="#decodeBlock" prefWidth="100" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+
+        <Label text="Corrected Encoded vs. Corrected Not Encoded" style="-fx-font-weight: bold;" GridPane.rowIndex="10"
+               GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <HBox spacing="10" GridPane.rowIndex="11" GridPane.columnIndex="1">
+            <TextField fx:id="correctedEncodedTextField" promptText="Corrected Encoded" prefWidth="155"/>
+            <TextField fx:id="correctedNotEncodedTextField" promptText="Corrected Not Encoded" prefWidth="155"/>
+        </HBox>
+
+        <Label text="Decoded vs. Original" style="-fx-font-weight: bold;" GridPane.rowIndex="12"
+               GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <HBox spacing="10" GridPane.rowIndex="13" GridPane.columnIndex="1">
+            <TextField fx:id="decodedEncodedTextField" promptText="Decoded Encoded" prefWidth="155"/>
+            <TextField fx:id="decodedNotEncodedTextField" promptText="Decoded Not Encoded" prefWidth="155"/>
+        </HBox>
+
+        <HBox spacing="10" GridPane.rowIndex="14" GridPane.columnIndex="1">
+            <Button text="Toggle Debug" onAction="#toggleDebugMode" prefWidth="120"/>
+            <Button text="Process" onAction="#processBlock" prefWidth="120"/>
+        </HBox>
+
     </GridPane>
 
-    <GridPane hgap="20" minHeight="700.0" minWidth="500.0" prefHeight="700.0" prefWidth="500.0" vgap="10">
-        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
-            <Label minWidth="80.0" prefHeight="26.0" prefWidth="80.0" text="Column (n):">
-                <padding>
-                    <Insets left="5.0"/>
-                </padding>
-                <HBox.margin>
-                    <Insets top="10.0"/>
-                </HBox.margin>
-            </Label>
-            <TextField fx:id="columnsField" minWidth="85.0" prefHeight="26.0" prefWidth="95.0" promptText="Enter n">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-                <HBox.margin>
-                    <Insets top="10.0"/>
-                </HBox.margin>
-            </TextField>
-            <Label prefHeight="24.0" prefWidth="116.0" text="Rows (k):">
-                <padding>
-                    <Insets left="5.0"/>
-                </padding>
-                <HBox.margin>
-                    <Insets top="10.0"/>
-                </HBox.margin>
-            </Label>
-            <TextField fx:id="rowsField" minWidth="85.0" prefHeight="26.0" prefWidth="85.0" promptText="Enter k">
-                <padding>
-                    <Insets left="5.0"/>
-                </padding>
-                <HBox.margin>
-                    <Insets top="10.0"/>
-                </HBox.margin>
-            </TextField>
-            <Button onAction="#generateMatrix" prefHeight="26.0" prefWidth="157.0" text="New Matrix">
-                <HBox.margin>
-                    <Insets right="5.0" top="10.0"/>
-                </HBox.margin>
-            </Button>
-        </HBox>
+    <GridPane xmlns="http://javafx.com/javafx"
+              xmlns:fx="http://javafx.com/fxml/1"
+              hgap="10" vgap="10">
 
-        <VBox spacing="10" GridPane.rowIndex="1">
-            <Label style="-fx-font-weight: bold;" text="Generating Matrix (G):">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <TableView fx:id="generatingMatrixTable" editable="true" prefHeight="200.0" prefWidth="280.0">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </TableView>
-        </VBox>
-
-        <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
-            <Label style="-fx-font-weight: bold;" text="Parity Check Matrix (H):">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <TableView fx:id="parityCheckMatrixTable" editable="true" prefHeight="200" prefWidth="280.0">
-                <padding>
-                    <Insets right="10.0"/>
-                </padding>
-            </TableView>
-        </VBox>
-
-        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="2">
-            <Label style="-fx-font-weight: bold;" text="Coset Leader:">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-        </HBox>
-
-        <HBox prefHeight="300.0" prefWidth="532.0" spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2"
-              GridPane.rowIndex="3">
-            <TableView fx:id="cosetLeaderTable" editable="true" prefHeight="300" prefWidth="400.0">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </TableView>
-        </HBox>
-
-        <HBox spacing="20" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4">
-            <Label prefHeight="26.0" prefWidth="52.0" text="Total:">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </Label>
-            <TextField fx:id="totalCosetLeaders" editable="false" prefHeight="26.0" prefWidth="66.0" promptText="0">
-                <padding>
-                    <Insets left="10.0"/>
-                </padding>
-            </TextField>
-        </HBox>
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
 
         <columnConstraints>
-            <ColumnConstraints/>
-            <ColumnConstraints/>
+            <ColumnConstraints minWidth="100" prefWidth="150"/>
+            <ColumnConstraints minWidth="200" prefWidth="250"/>
         </columnConstraints>
-        <rowConstraints>
-            <RowConstraints maxHeight="42.0" minHeight="10.0" prefHeight="32.0"/>
-            <RowConstraints maxHeight="226.0" minHeight="216.0" prefHeight="226.0"/>
-            <RowConstraints minHeight="10.0" prefHeight="30.0"/>
-            <RowConstraints/>
-            <RowConstraints/>
-        </rowConstraints>
+
+        <Label text="Columns (n):" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="columnsField" promptText="Enter n" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Rows (k):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="rowsField" promptText="Enter k" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Button text="New Matrix" onAction="#generateMatrix" prefWidth="120" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.halignment="LEFT"/>
+
+        <Label text="Generating Matrix (G):" style="-fx-font-weight: bold;" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <TableView fx:id="generatingMatrixTable" editable="true" prefHeight="200" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <Label text="Parity Check Matrix (H):" style="-fx-font-weight: bold;" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <TableView fx:id="parityCheckMatrixTable" editable="true" prefHeight="200" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <Label text="Coset Leader:" style="-fx-font-weight: bold;" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <TableView fx:id="cosetLeaderTable" editable="true" prefHeight="300" GridPane.rowIndex="8" GridPane.columnIndex="0" GridPane.columnSpan="2"/>
+
+        <Label text="Total:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+        <TextField fx:id="totalCosetLeaders" promptText="0" editable="false" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
     </GridPane>
 </SplitPane>

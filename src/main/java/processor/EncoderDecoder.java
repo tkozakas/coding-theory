@@ -8,6 +8,7 @@ public class EncoderDecoder {
     private final Random random = new Random();
     private boolean debug;
     private int introducedErrors = 0;
+    private List<Integer> errorPositions;
 
     /**
      * Encodes a message using the generator matrix G.
@@ -70,6 +71,7 @@ public class EncoderDecoder {
                 if (q == 2) {
                     r[i] ^= 1; // Flip the bit
                     introducedErrors++;
+                    errorPositions.add(i);
                 } else if (q > 2) {
                     // Change the symbol to a random one
                     int currentSymbol = r[i];
@@ -79,6 +81,7 @@ public class EncoderDecoder {
                     } while (newSymbol == currentSymbol);
                     r[i] = newSymbol;
                     introducedErrors++;
+                    errorPositions.add(i);
                 } else {
                     throw new IllegalArgumentException("Invalid value for q: " + q);
                 }
@@ -289,5 +292,9 @@ public class EncoderDecoder {
 
     public void setIntroducedErrors(int introducedErrors) {
         this.introducedErrors = introducedErrors;
+    }
+
+    public List<Integer> getErrorPositions() {
+        return errorPositions;
     }
 }
