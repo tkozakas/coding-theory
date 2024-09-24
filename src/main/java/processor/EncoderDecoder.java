@@ -222,15 +222,15 @@ public class EncoderDecoder {
      * Decodes a received vector.
      * @param r received vector
      * @param H parity-check matrix
-     * @param k message length
      * @param cosetLeaders list of coset leaders
      * @return decoded message
      */
-    public int[] decode(int[] r, int[][] H, int k, List<CosetLeader> cosetLeaders) {
-        // Compute the syndrome of the received vector
+    public int[] decode(int[] r, int[][] H, List<CosetLeader> cosetLeaders) {
+        if (r.length != H[0].length) { // TODO: Check what to do when the received vector is not of the same length as the parity-check matrix
+            return r;
+        }
         int[] syndrome = computeSyndrome(H, r);
 
-        // Find the coset leader with the matching syndrome
         CosetLeader cosetLeader = cosetLeaders.stream()
                 .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
                 .findFirst()
@@ -244,22 +244,16 @@ public class EncoderDecoder {
 
         if (cosetLeader == null) {
             System.out.println("Error: Coset leader not found for the received vector.");
-            return new int[0];
+            return r;
         }
 
-        // Correct the received vector
         int[] correctedVector = new int[r.length];
         for (int i = 0; i < r.length; i++) {
             correctedVector[i] = (r[i] + cosetLeader.errorPattern()[i]) % 2;
         }
 
-        // Extract the decoded message
-        int[] decodedMessage = new int[k];
-        System.arraycopy(correctedVector, 0, decodedMessage, 0, k);
-
         System.out.printf("Corrected codeword: %s%n", Arrays.toString(correctedVector));
-        System.out.printf("Decoded message: %s (%s)%n", Arrays.toString(decodedMessage), Processor.getStringFromBits(decodedMessage));
-        return decodedMessage;
+        return correctedVector;
     }
 
     /**

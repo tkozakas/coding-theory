@@ -27,7 +27,7 @@ public class UserInterface {
 
     public UserInterface() {
         encoderDecoder = new EncoderDecoder();
-        processor = new Processor(encoderDecoder, G, k, pe, q);
+        processor = new Processor(encoderDecoder, G, pe, q);
         textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
         imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
     }
@@ -172,12 +172,12 @@ public class UserInterface {
                         testVector[count++] = i;
                     }
                     testVector = Arrays.copyOfRange(testVector, 0, count);
-                    Processor processor = new Processor(encoderDecoder, G, k, pe, q);
-                    int[] decoded = processor.processBlock(testVector, k);
+                    Processor processor = new Processor(encoderDecoder, G, pe, q);
+                    processor.processBlock(testVector, k);
 
                     long endTime = System.nanoTime();
 
-                    if (decoded == null || decoded.length == 0) {
+                    if (processor.getDecoded() == null || processor.getDecoded().length == 0) {
                         continue;
                     }
 
@@ -208,7 +208,7 @@ public class UserInterface {
             inputVector();
         }
 
-        processor = new Processor(encoderDecoder, G, k, pe, q);
+        processor = new Processor(encoderDecoder, G, pe, q);
         processor.processBlock(m, k);
     }
 
@@ -217,7 +217,7 @@ public class UserInterface {
         String text = scanner.nextLine();
 
         textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
-        textProcessor.processText(text);
+        textProcessor.getBitRepresentation(text);
     }
 
     private void inputImage() {
@@ -227,6 +227,6 @@ public class UserInterface {
         String outputPath = scanner.nextLine();
 
         imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
-        imageProcessor.processImage(inputPath, outputPath);
+        imageProcessor.getBitRepresentation(inputPath);
     }
 }

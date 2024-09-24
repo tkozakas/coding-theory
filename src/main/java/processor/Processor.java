@@ -9,14 +9,17 @@ public class Processor {
     private final double pe;
     private final int[][] G;
     private final int q;
-    private final int k;
 
-    public Processor(processor.EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
+    private int[] r;
+    private int[] c;
+    private int[] corrected;
+    private int[] decoded;
+
+    public Processor(processor.EncoderDecoder encoderDecoder, int[][] G, double pe, int q) {
         this.encoderDecoder = encoderDecoder;
         this.pe = pe;
         this.q = q;
         this.G = G;
-        this.k = k;
     }
 
     public static StringBuilder getStringFromBits(int[] bits) {
@@ -35,23 +38,29 @@ public class Processor {
         return decodedText;
     }
 
-    public int[] processBlock(int[] m, int k) {
-        int[] c = encoderDecoder.encode(m, G);
-        int[] r = encoderDecoder.introduceErrors(c, pe, q);
+    public void processBlock(int[] m, int k) {
+        c = encoderDecoder.encode(m, G);
+        r = encoderDecoder.introduceErrors(c, pe, q);
         int[][] H = encoderDecoder.generateParityCheckMatrix(G);
         List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
-
-        return encoderDecoder.decode(r, H, k, cosetLeaders);
+        corrected = encoderDecoder.decode(r, H, cosetLeaders);
+        decoded = new int[k];
+        System.arraycopy(corrected, 0, decoded, 0, k);
     }
 
-    protected void sendChunk(List<int[]> decodedResults, int[] bits) {
-        for (int i = 0; i < bits.length; i += k) {
-            // Copy the next k bits into a new array
-            int[] m = new int[k];
-            int bitsToCopy = Math.min(k, bits.length - i);
-            System.arraycopy(bits, i, m, 0, bitsToCopy);
-            int[] decodedMessage = processBlock(m, k);
-            decodedResults.add(decodedMessage);
-        }
+    public int[] getR() {
+        return r;
+    }
+
+    public int[] getC() {
+        return c;
+    }
+
+    public int[] getCorrected() {
+        return corrected;
+    }
+
+    public int[] getDecoded() {
+        return decoded;
     }
 }

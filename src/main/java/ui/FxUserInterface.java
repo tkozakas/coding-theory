@@ -9,7 +9,6 @@ import javafx.util.converter.IntegerStringConverter;
 import model.CosetLeader;
 import processor.EncoderDecoder;
 import processor.ImageProcessor;
-import processor.Processor;
 import processor.TextProcessor;
 
 import java.io.File;
@@ -19,9 +18,6 @@ import java.util.List;
 public class FxUserInterface {
     @FXML
     private ComboBox<String> inputTypeComboBox;
-
-    @FXML
-    private TextField inputField;
     @FXML
     private TextField columnsField;
     @FXML
@@ -36,9 +32,37 @@ public class FxUserInterface {
     @FXML
     public TableView<CosetLeader> cosetLeaderTable;
 
+
+    //===============================================================================================================
+    @FXML
+    private TextField inputField;
+    //===============================================================================================================
+    @FXML
+    private TextField blockTextField;
+    //===============================================================================================================
+    @FXML
+    private TextField encodedInputTextField;
+    @FXML
+    private TextField notEncodedInputTextField;
+    //===============================================================================================================
+    @FXML
+    private TextField receivedBitsEncodedTextField;
+    @FXML
+    private TextField receivedNotEncodedTextField;
+    //===============================================================================================================
+    @FXML
+    private TextField correctedEncodedTextField;
+    @FXML
+    private TextField correctedNotEncodedTextField;
+    //===============================================================================================================
+    @FXML
+    private TextField decodedEncodedTextField;
+    @FXML
+    private TextField decodedNotEncodedTextField;
+    //===============================================================================================================
+
     private boolean debugMode = false;
     private EncoderDecoder encoderDecoder;
-    private Processor processor;
     private TextProcessor textProcessor;
     private ImageProcessor imageProcessor;
 
@@ -49,6 +73,20 @@ public class FxUserInterface {
     private int[][] H;
     private int n;
     private int k;
+
+    private int currentBitPosition = 0;
+
+    private int[] encodedBits;
+    private int[] notEncodedBits;
+
+    private int[] receivedBitsForEncoded;
+    private int[] receivedBitsForNotEncoded;
+
+    private int[] correctedEncoded;
+    private int[] correctedNotEncoded;
+
+    private int[] decodedEncodedBits;
+    private int[] decodedNotEncodedBits;
 
     @FXML
     private void initialize() {
@@ -108,7 +146,6 @@ public class FxUserInterface {
             List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
             setupCosetLeaderTable(cosetLeaders);
 
-            processor = new Processor(encoderDecoder, G, k, pe, q);
             textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
             imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
 
@@ -183,61 +220,108 @@ public class FxUserInterface {
         showAlert("Debug Mode", "Debug mode is now " + status + ".");
     }
 
+    private int[] getBlockFromInputBits() {
+        int[] inputBits = getBitsFromInput();
+        int end = Math.min(currentBitPosition + k, inputBits.length);
+        int[] block = Arrays.copyOfRange(inputBits, currentBitPosition, end);
+        currentBitPosition = end;
+        if (block.length < k) {
+            block = Arrays.copyOf(block, k);
+        }
+        return block;
+    }
+
+    private int[] getBitsFromInput() {
+        String input = inputField.getText();
+        switch (inputTypeComboBox.getValue()) {
+            case "Vector" -> {
+                return Arrays.stream(input.split("\\s+"))
+                        .mapToInt(Integer::parseInt)
+                        .toArray();
+            }
+            case "Text" -> {
+                return textProcessor.getBitRepresentation(input);
+            }
+            case "Image" -> {
+                return imageProcessor.getBitRepresentation(input);
+            }
+            default -> {
+                return new int[0];
+            }
+        }
+    }
+
+    /**
+     * Handles the "Encode" button action.
+     * Encodes the input block and displays encoded and not encoded vectors.
+     */
     @FXML
-    private void processBlock() {
+    public void encodeBlock() {
         try {
-            String selectedType = inputTypeComboBox.getValue();
-            switch (selectedType) {
-                case "Vector" -> inputVector();
-                case "Text" -> inputText();
-                case "Image" -> inputImage();
-                default -> showAlert("Error", "Invalid input type selected.");
-            }
+            notEncodedBits = getBlockFromInputBits();
+            encodedBits = encoderDecoder.encode(notEncodedBits, G);
+
+            blockTextField.setText(Arrays.toString(notEncodedBits));
+            encodedInputTextField.setText(Arrays.toString(encodedBits));
+            notEncodedInputTextField.setText(Arrays.toString(notEncodedBits));
         } catch (Exception e) {
-            showAlert("Error", "Failed to process block. Please check your input and try again.");
+            showAlert("Error", "Failed to encode block. Please check your input.");
         }
     }
 
-    private void inputVector() {
+    /**
+     * Handles the "Send" button action.
+     * Simulates sending the encoded block through a noisy channel and displays the received and original blocks.
+     */
+    @FXML
+    public void sendBlock() {
         try {
-            int[] m = inputField.getText().chars()
-                    .filter(Character::isDigit)
-                    .map(c -> c - '0')
-                    .toArray();
+            receivedBitsForEncoded = encoderDecoder.introduceErrors(encodedBits, pe, q);
+            receivedBitsForNotEncoded = encoderDecoder.introduceErrors(notEncodedBits, pe, q);
 
-            // TODO: fill with zeros if the length of the vector is less than k (same as in TextProcessor)
-            if (m.length != k) {
-                showAlert("Error", "The length of the vector should be equal to the number of rows (k) in the matrix.");
-                return;
-            }
-
-            processor = new Processor(encoderDecoder, G, k, pe, q);
-            processor.processBlock(m, k);
+            receivedBitsEncodedTextField.setText(Arrays.toString(receivedBitsForEncoded));
+            receivedNotEncodedTextField.setText(Arrays.toString(receivedBitsForNotEncoded));
         } catch (Exception e) {
-            showAlert("Error", "Invalid vector input. Please enter a valid binary vector.");
+            showAlert("Error", "Failed to send block. Please check your encoded data.");
         }
     }
 
-    private void inputText() {
+    /**
+     * Handles the "Decode" button action.
+     * Decodes the received block, corrects errors, and displays the corrected and decoded blocks.
+     */
+    @FXML
+    public void decodeBlock() {
         try {
-            String text = inputField.getText();
-            textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
-            textProcessor.processText(text);
+            correctedEncoded = encoderDecoder.decode(receivedBitsForEncoded, H, encoderDecoder.findCosetLeaders(H));
+            correctedNotEncoded = encoderDecoder.decode(receivedBitsForNotEncoded, H, encoderDecoder.findCosetLeaders(H));
+
+            decodedEncodedBits = new int[k];
+            System.arraycopy(correctedEncoded, 0, decodedEncodedBits, 0, k);
+
+            decodedNotEncodedBits = new int[k];
+            System.arraycopy(correctedNotEncoded, 0, decodedNotEncodedBits, 0, k);
+
+            correctedEncodedTextField.setText(Arrays.toString(correctedEncoded));
+            correctedNotEncodedTextField.setText(Arrays.toString(correctedNotEncoded));
+            decodedEncodedTextField.setText(Arrays.toString(decodedEncodedBits));
+            decodedNotEncodedTextField.setText(Arrays.toString(decodedNotEncodedBits));
         } catch (Exception e) {
-            showAlert("Error", "Failed to process text. Please check your input and try again.");
+            showAlert("Error", "Failed to decode block. Please check your received data.");
         }
     }
 
-    private void inputImage() {
-        try {
-            String inputPath = inputField.getText();
-            String outputPath = "img/img_decoded" + inputPath.substring(inputPath.lastIndexOf('.'));
-
-            imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
-            imageProcessor.processImage(inputPath, outputPath);
-        } catch (Exception e) {
-            showAlert("Error", "Failed to process image. Please check the path and try again.");
+    /**
+     * Processes all steps (encode, send, decode) at once for all blocks.
+     */
+    @FXML
+    public void processBlock() {
+        while (currentBitPosition < getBitsFromInput().length) {
+            encodeBlock();
+            sendBlock();
+            decodeBlock();
         }
+        currentBitPosition = 0;
     }
 
     private void showAlert(String title, String message) {
