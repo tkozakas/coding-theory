@@ -1,6 +1,5 @@
 package ui;
 
-import model.ExperimentResult;
 import processor.EncoderDecoder;
 import processor.ImageProcessor;
 import processor.Processor;
@@ -24,6 +23,10 @@ public class UserInterface {
     private int[][] G;
     private int n;
     private int k;
+    private final List<int[]> decodedBlocks = new ArrayList<>();
+    private int[] m;
+    private int currentBitPosition = 0;
+    private int[] bits;
 
     public UserInterface() {
         encoderDecoder = new EncoderDecoder();
@@ -38,6 +41,10 @@ public class UserInterface {
     }
 
     private void inputMenu() {
+        if (G == null) {
+            System.out.println("Error: Please enter the generating matrix first.");
+            mainMenu();
+        }
         while (true) {
             System.out.println("""
                     \nChoose an option:
@@ -45,7 +52,7 @@ public class UserInterface {
                     2. Process Text
                     3. Process Image
                     4. Generate new matrix
-                    5. Exit
+                    5. Back to main menu
                     Choice:\s""");
             int choice = scanner.nextInt();
             scanner.nextLine();
@@ -66,37 +73,48 @@ public class UserInterface {
 
     private void mainMenu() {
         while (true) {
-            System.out.printf("%n%nProbability of error: %.5f%nNumber of symbols in the alphabet: %d%n%n", pe, q);
+            System.out.printf("%n%nProbability of error: %.5f%n" +
+                            "Number of symbols in the alphabet: %d%n" +
+                            "Generator matrix: %s%n" +
+                            "Input vector length: %d%n" +
+                            "Input vector: %s%n%n",
+                    pe, q,
+                    G != null ? Arrays.deepToString(G) : "Empty",
+                    k,
+                    Arrays.toString(m));
+
             System.out.printf("""
                     \nChoose an option:
-                    1. Enter generating matrix
-                    2. Generate generating matrix
-                    3. Change probability of error
-                    4. Change number of symbols in the alphabet
-                    5. Debug mode (currently %s)
-                    6. Run experiments
+                    1. Input (vector, text, image) to process
+                    2. Enter generating matrix
+                    3. Generate generating matrix
+                    4. Change probability of error
+                    5. Change number of symbols in the alphabet
+                    6. Debug mode (currently %s)
+                    7. Run experiments
                     Choice:\s""", encoderDecoder.isDebug() ? "ON" : "OFF");
             int choice = scanner.nextInt();
             scanner.nextLine();
 
             switch (choice) {
-                case 1 -> enterMatrix();
-                case 2 -> getMatrix();
-                case 3 -> {
+                case 1 -> inputMenu();
+                case 2 -> enterMatrix();
+                case 3 -> getMatrix();
+                case 4 -> {
                     System.out.print("Enter the new probability of error: ");
                     pe = scanner.nextDouble();
                     mainMenu();
                 }
-                case 4 -> {
+                case 5 -> {
                     System.out.print("Enter the new number of symbols in the alphabet: ");
                     q = scanner.nextInt();
                     mainMenu();
                 }
-                case 5 -> {
+                case 6 -> {
                     encoderDecoder.setDebug(!encoderDecoder.isDebug());
                     mainMenu();
                 }
-                case 6 -> experiments();
+                case 7 -> experiments();
                 default -> System.out.println("Invalid choice. Please try again.");
             }
         }
@@ -110,7 +128,7 @@ public class UserInterface {
         scanner.nextLine();
 
         G = encoderDecoder.generateGeneratingMatrix(k, n);
-        inputMenu();
+        mainMenu();
     }
 
     private void enterMatrix() {
@@ -144,61 +162,17 @@ public class UserInterface {
             System.out.println("Error: Invalid input. Please try again.");
             enterMatrix();
         }
-        inputMenu();
+        mainMenu();
     }
 
     private void experiments() {
-        System.out.println("From 0 to x: ");
-        int x = scanner.nextInt();
-        System.out.println("Running experiments...");
-        List<ExperimentResult> results = new ArrayList<>();
-
-        for (int n = 8; n <= x; n *= 2) {
-            for (int k = 8; k <= x; k *= 2) {
-                if (n <= k) {
-                    continue;
-                }
-                for (double pe = 0.0001; pe <= 0.9; pe *= 2) {
-                    long startTime = System.nanoTime();
-
-                    int[][] G = encoderDecoder.generateGeneratingMatrix(k, n);
-
-                    // Run a test encoding/decoding
-                    int[] testVector = new int[10];
-                    int count = 0;
-                    for (int z = 0; z < k; z++) {
-                        int i = (int) (Math.random() * 2);
-                        if (testVector.length == count) testVector = Arrays.copyOf(testVector, count * 2);
-                        testVector[count++] = i;
-                    }
-                    testVector = Arrays.copyOfRange(testVector, 0, count);
-                    Processor processor = new Processor(encoderDecoder, G, pe, q);
-                    int[] decoded = processor.processBlock(testVector, k);
-
-                    long endTime = System.nanoTime();
-
-                    if (decoded == null || decoded.length == 0) {
-                        continue;
-                    }
-
-                    double duration = (endTime - startTime) / 1e6; // Convert to milliseconds
-                    results.add(new ExperimentResult(n, k, pe, duration));
-                }
-            }
-        }
-
-        System.out.println("Experiments completed.");
-        System.out.println("Results:");
-        System.out.println("n \t\t\t k \t\t\t pe \t\t Duration (ms)");
-        for (ExperimentResult result : results) {
-            System.out.printf("%d \t\t\t %d \t\t\t %.5f \t\t %.2f%n", result.n(), result.k(), result.pe(), result.duration());
-        }
+        // TODO Implement experiments
     }
 
 
     private void inputVector() {
         System.out.println("Enter the vector to encode:");
-        int[] m = scanner.nextLine().chars()
+        m = scanner.nextLine().chars()
                 .filter(Character::isDigit)
                 .map(c -> c - '0')
                 .toArray();
@@ -209,25 +183,62 @@ public class UserInterface {
         }
 
         processor = new Processor(encoderDecoder, G, pe, q);
-        int[] decoded = processor.processBlock(m, k);
-        System.out.println("Decoded message: " + Arrays.toString(decoded));
+        while (currentBitPosition < bits.length) {
+            int[] block = getBlockFromInputBits();
+            int[] decoded = processor.processBlock(block, k);
+            System.out.println("Decoded block: " + Arrays.toString(decoded));
+            decodedBlocks.add(decoded);
+        }
+        System.out.println("Decoded text: " + getDecodedText());
     }
 
     private void inputText() {
         System.out.println("Enter the text to encode:");
         String text = scanner.nextLine();
 
+        bits = textProcessor.getBitRepresentation(text);
+
         textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
-        int[] bits = textProcessor.getBitRepresentation(text);
-        // TODO: Implement text processing
+        while (currentBitPosition < bits.length) {
+            int[] block = getBlockFromInputBits();
+            int[] decoded = textProcessor.processBlock(block, k);
+            System.out.println("Decoded block: " + Arrays.toString(decoded));
+            decodedBlocks.add(decoded);
+        }
+        System.out.println("Decoded text: " + getDecodedText());
     }
 
     private void inputImage() {
         System.out.println("Enter the path to the image file:");
         String inputPath = scanner.nextLine();
 
+        bits = imageProcessor.getBitRepresentation(inputPath);
+
         imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
-        int[] bits = imageProcessor.getBitRepresentation(inputPath);
-        // TODO: Implement image processing
+        while (currentBitPosition < bits.length) {
+            int[] block = getBlockFromInputBits();
+            int[] decoded = imageProcessor.processBlock(block, k);
+            System.out.println("Decoded block: " + Arrays.toString(decoded));
+            decodedBlocks.add(decoded);
+        }
+        System.out.println("Decoded text: " + getDecodedText());
+    }
+
+    private int[] getBlockFromInputBits() {
+        int end = Math.min(currentBitPosition + k, bits.length);
+        int[] block = Arrays.copyOfRange(bits, currentBitPosition, end);
+        currentBitPosition = end;
+        if (block.length < k) {
+            block = Arrays.copyOf(block, k);
+        }
+        return block;
+    }
+
+    private String getDecodedText() {
+        StringBuilder decodedText = new StringBuilder();
+        for (int[] block : decodedBlocks) {
+            decodedText.append(Processor.getStringFromBits(block));
+        }
+        return decodedText.toString();
     }
 }

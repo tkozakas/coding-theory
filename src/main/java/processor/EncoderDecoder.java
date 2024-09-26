@@ -8,6 +8,7 @@ public class EncoderDecoder {
     private final Random random = new Random();
     private boolean debug;
     private int introducedErrors = 0;
+    private int fixedErrors = 0;
     private final List<Integer> errorPositions = new ArrayList<>();
 
     /**
@@ -120,7 +121,6 @@ public class EncoderDecoder {
      * Generates the parity-check matrix H from the generator matrix G.
      * @param G generator matrix
      * @return parity-check matrix
-     *
      * G = [I_k | P]
      * H = [P^T | I_(n-k)]
      */
@@ -158,118 +158,142 @@ public class EncoderDecoder {
         return H;
     }
 
-    /**
-     * Computes the syndrome of a received vector.
-     * @param H parity-check matrix
-     * @param r received vector
-     * @return syndrome
-     *
-     * s = r * H^T
-     */
     public int[] computeSyndrome(int[][] H, int[] r) {
         int[] s = new int[H.length];
         for (int i = 0; i < H.length; i++) {
             for (int j = 0; j < H[0].length; j++) {
-                s[i] += H[i][j] * r[j];
+                s[i] ^= H[i][j] & r[j];
             }
-            s[i] %= 2;
         }
         return s;
     }
 
-    /**
-     * Finds the coset leaders of the code.
-     * @param H parity-check matrix
-     * @return list of coset leaders
-     */
-    public List<CosetLeader> findCosetLeaders(int[][] H) {
-        int n = H[0].length;
-        Map<String, CosetLeader> cosetLeadersMap = new HashMap<>();
+    public Map<String, CosetLeader> findCosetLeaders(int[][] H, int maxWeight) {
+        int n = H[0].length; // Number of columns in H
+        int m = H.length;    // Number of rows in H (syndrome length)
+        int totalSyndromes = 1 << m; // Total possible syndromes (2^m)
+
+        // Use LinkedHashMap to preserve the order of insertion (syndromes)
+        Map<String, CosetLeader> cosetLeadersMap = new LinkedHashMap<>();
+
+        // Initialize coset leaders with maximum weight (n + 1), assuming no error pattern yet
+        initializeCosetLeaders(cosetLeadersMap, m, n);
 
         if (debug) {
             System.out.println("\n=== Finding Coset Leaders ===");
             System.out.println("Syndrome | Error Pattern | Hamming Weight");
         }
 
-        for (int i = 0; i < (1 << n); i++) {
-            int[] errorPattern = new int[n];
-            for (int j = 0; j < n; j++) {
-                // find all possible error patterns
-                errorPattern[j] = (i >> (n - 1 - j)) & 1;
+        // Generate and evaluate error patterns for each weight up to maxWeight
+        for (int weight = 0; weight <= maxWeight; weight++) {
+            List<int[]> errorPatterns = generateErrorPatterns(n, weight);
+            updateCosetLeaders(cosetLeadersMap, H, errorPatterns, weight);
+        }
+
+        // Remove any coset leaders with null error patterns, which were never updated
+        cosetLeadersMap.entrySet().removeIf(entry -> entry.getValue().errorPattern() == null);
+
+        if (debug) {
+            System.out.println("Total coset leaders found: " + cosetLeadersMap.size());
+        }
+
+        return cosetLeadersMap;
+    }
+
+    private void initializeCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int m, int n) {
+        int totalSyndromes = 1 << m;
+        for (int i = 0; i < totalSyndromes; i++) {
+            int[] syndrome = new int[m];
+            for (int j = 0; j < m; j++) {
+                syndrome[j] = (i >> (m - 1 - j)) & 1;
             }
-            // compute the syndrome
+            String syndromeStr = Arrays.toString(syndrome);
+            cosetLeadersMap.put(syndromeStr, new CosetLeader(syndrome, null, n + 1)); // Initialize with max weight
+        }
+    }
+
+    private void updateCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int[][] H, List<int[]> errorPatterns, int weight) {
+        for (int[] errorPattern : errorPatterns) {
             int[] syndrome = computeSyndrome(H, errorPattern);
             String syndromeStr = Arrays.toString(syndrome);
 
-            // compute the weight of the error pattern
-            int weight = hammingWeight(errorPattern);
-            // check if a coset leader already exists for the syndrome
             CosetLeader existingLeader = cosetLeadersMap.get(syndromeStr);
-
-            if (existingLeader == null || weight < existingLeader.weight()) {
+            if (existingLeader != null && weight < existingLeader.weight()) {
+                // Update the coset leader with the new error pattern if it has a lower weight
                 cosetLeadersMap.put(syndromeStr, new CosetLeader(syndrome, errorPattern, weight));
                 if (debug) {
                     System.out.println(syndromeStr + " | " + Arrays.toString(errorPattern) + " | " + weight);
                 }
             }
         }
-
-        if (debug) {
-            System.out.println("Total coset leaders found: " + cosetLeadersMap.size());
-        }
-
-        return new ArrayList<>(cosetLeadersMap.values());
     }
 
-    /**
-     * Decodes a received vector.
-     * @param r received vector
-     * @param H parity-check matrix
-     * @param cosetLeaders list of coset leaders
-     * @return decoded message
-     */
-    public int[] decode(int[] r, int[][] H, List<CosetLeader> cosetLeaders) {
-        if (r.length != H[0].length) { // TODO: Check what to do when the received vector is not of the same length as the parity-check matrix
-            return r;
-        }
-        int[] syndrome = computeSyndrome(H, r);
-
-        CosetLeader cosetLeader = cosetLeaders.stream()
-                .filter(cl -> Arrays.equals(cl.syndrome(), syndrome))
-                .findFirst()
-                .orElse(null);
-
-        if (debug) {
-            System.out.println("\n=== Decoding ===");
-            System.out.println("Syndrome (s): " + Arrays.toString(syndrome));
-            System.out.printf("Selected coset leader: %s%n", cosetLeader == null ? "Not Found" : Arrays.toString(cosetLeader.errorPattern()));
-        }
-
-        if (cosetLeader == null) {
-            System.out.println("Error: Coset leader not found for the received vector.");
-            return r;
-        }
-
-        int[] correctedVector = new int[r.length];
-        for (int i = 0; i < r.length; i++) {
-            correctedVector[i] = (r[i] + cosetLeader.errorPattern()[i]) % 2;
-        }
-
-        System.out.printf("Corrected codeword: %s%n", Arrays.toString(correctedVector));
-        return correctedVector;
+    private List<int[]> generateErrorPatterns(int n, int w) {
+        List<int[]> patterns = new ArrayList<>();
+        int[] pattern = new int[n];
+        generateErrorPatternsRecursive(patterns, pattern, 0, 0, w);
+        return patterns;
     }
 
-    /**
-     * Computes the Hamming weight of a vector.
-     * @param vector input vector
-     * @return Hamming weight
-     */
-    private int hammingWeight(int[] vector) {
-        int weight = 0;
-        for (int bit : vector) {
-            weight += bit;
+    private void generateErrorPatternsRecursive(List<int[]> patterns, int[] pattern, int start, int ones, int w) {
+        if (ones == w) {
+            patterns.add(pattern.clone());
+            return;
         }
-        return weight;
+        for (int i = start; i < pattern.length; i++) {
+            pattern[i] = 1;
+            generateErrorPatternsRecursive(patterns, pattern, i + 1, ones + 1, w);
+            pattern[i] = 0;
+        }
+    }
+
+    public int[] decodeStepByStep(int[] r, int[][] H, Map<String, CosetLeader> cosetLeadersMap) {
+        int n = r.length;
+        int i = 0; // zero-based index
+        int[] rCopy = Arrays.copyOf(r, n);
+
+        while (true) {
+            int[] syndrome = computeSyndrome(H, rCopy);
+            String syndromeStr = Arrays.toString(syndrome);
+            CosetLeader cosetLeader = cosetLeadersMap.get(syndromeStr);
+            int w = (cosetLeader != null) ? cosetLeader.weight() : n + 1;
+
+            if (w == 0) {
+                // rCopy is a codeword
+                if (debug) {
+                    System.out.println("Decoded codeword: " + Arrays.toString(rCopy));
+                }
+                return rCopy;
+            }
+
+            if (i >= n) {
+                // Reached the end, cannot decode
+                System.out.println("Error: Cannot decode the received vector.");
+                return rCopy;
+            }
+
+            // Flip bit i
+            rCopy[i] ^= 1; // Flip the bit
+
+            // Compute new syndrome and coset leader weight
+            int[] syndromeNew = computeSyndrome(H, rCopy);
+            String syndromeNewStr = Arrays.toString(syndromeNew);
+            CosetLeader cosetLeaderNew = cosetLeadersMap.get(syndromeNewStr);
+            int wNew = (cosetLeaderNew != null) ? cosetLeaderNew.weight() : n + 1;
+
+            if (wNew < w) {
+                fixedErrors++;
+                if (debug) {
+                    System.out.printf("Flipped bit %d, new coset leader weight %d < %d%n", i + 1, wNew, w);
+                }
+                // Keep rCopy as is (with the bit flipped)
+            } else {
+                // Revert the change
+                rCopy[i] ^= 1; // Flip the bit back
+            }
+
+            i++;
+        }
     }
 
     private void printMatrix(int[][] matrix) {
@@ -282,6 +306,10 @@ public class EncoderDecoder {
         return introducedErrors;
     }
 
+    public int getFixedErrors() {
+        return fixedErrors;
+    }
+
     public List<Integer> getErrorPositions() {
         return errorPositions;
     }
@@ -289,7 +317,6 @@ public class EncoderDecoder {
     public boolean isDebug() {
         return debug;
     }
-
 
     public void setDebug(boolean debug) {
         this.debug = debug;

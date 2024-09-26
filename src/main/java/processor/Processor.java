@@ -3,7 +3,7 @@ package processor;
 import model.CosetLeader;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 public class Processor {
     protected final processor.EncoderDecoder encoderDecoder;
@@ -38,8 +38,8 @@ public class Processor {
         int[] c = encoderDecoder.encode(m, G);
         int[] r = encoderDecoder.introduceErrors(c, pe, q);
         int[][] H = encoderDecoder.generateParityCheckMatrix(G);
-        List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
-        int[] corrected = encoderDecoder.decode(r, H, cosetLeaders);
+        Map<String, CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H, 2);
+        int[] corrected = encoderDecoder.decodeStepByStep(r, H, cosetLeaders);
         int[] decoded = new int[k];
         System.arraycopy(corrected, 0, decoded, 0, k);
         System.out.println("\n=========================================\n");

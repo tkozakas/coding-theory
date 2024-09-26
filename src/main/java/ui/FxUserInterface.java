@@ -16,6 +16,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class FxUserInterface {
     public TableView<Integer[]> generatingMatrixTable;
@@ -27,24 +28,26 @@ public class FxUserInterface {
     public TextField columnsField;
     public TextField rowsField;
     public TextField totalCosetLeaders;
-    public TextField inputField;
+    public TextField inputTextField;
     public TextField errorProbabilityField;
-    public TextField encodedInputTextField;
-    public TextField notEncodedInputTextField;
-    public TextField receivedBitsEncodedTextField;
-    public TextField receivedNotEncodedTextField;
-    public TextField correctedEncodedTextField;
-    public TextField correctedNotEncodedTextField;
-    public TextField decodedEncodedTextField;
-    public TextField decodedNotEncodedTextField;
     public TextField alphabetSizeField;
 
-    public Label errorLabel;
-    public Label errorPositionLabel;
-    public Label blockLabel;
+    public TextField encodedBlockTextField;
+    public TextField receivedBlockTextField;
+    public TextField correctedBlockTextField;
+    public TextField decodedBlockTextField;
+
+    public Label errorCountLabel;
+    public Label errorPositionsLabel;
+    public Label currentBlockLabel;
     public Label probabilityLabel;
     public Label alphabetLabel;
     public Label decodedTextLabel;
+    public Label inputTextLabel;
+    public Label errorsFixedLabel;
+    public Label letterLabel;
+    public Label introducedErrorCountLabel;
+    public Label totalFixedErrorsLabel;
 
     private boolean debugMode = false;
     private EncoderDecoder encoderDecoder;
@@ -59,15 +62,12 @@ public class FxUserInterface {
     private int n;
     private int k;
 
+    private int[] block;
+    private int[] inputBits;
     private int currentBitPosition = 0;
 
-    private int[] encodedBits;
-    private int[] notEncodedBits;
-
-    private int[] receivedBitsForEncoded;
-    private int[] receivedBitsForNotEncoded;
-
     private final List<int[]> decodedBlocks = new ArrayList<>();
+    private Map<String, CosetLeader> cosetLeaders;
 
     @FXML
     private void initialize() {
@@ -80,16 +80,16 @@ public class FxUserInterface {
     private void updateMatrix() {
         H = encoderDecoder.generateParityCheckMatrix(G);
         setupMatrixTable(parityCheckMatrixTable, H, n - k, n);
-        List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
+        cosetLeaders = encoderDecoder.findCosetLeaders(H, 2);
         setupCosetLeaderTable(cosetLeaders);
     }
 
     @FXML
     private void handleInputTypeSelection() {
-        inputField.clear();
+        inputTextField.clear();
         String selectedType = inputTypeComboBox.getValue();
-        inputField.setPromptText(switch (selectedType) {
-            case "Vector" -> "Enter vector (e.g., 1 0 1)";
+        inputTextField.setPromptText(switch (selectedType) {
+            case "Vector" -> "Vector (e.g., 1, 0, 1)";
             case "Text" -> "Enter text";
             case "Image" -> handleImageInput();
             default -> "Enter input";
@@ -104,10 +104,11 @@ public class FxUserInterface {
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
         );
 
-        File selectedFile = fileChooser.showOpenDialog(inputField.getScene().getWindow());
+        File selectedFile = fileChooser.showOpenDialog(inputTextField.getScene().getWindow());
         if (selectedFile != null) {
-            inputField.setText(selectedFile.getPath());
+            inputTextField.setText(selectedFile.getPath());
         }
+        decodedTextLabel.setText("Decoded Image:");
         return "Enter image path";
     }
 
@@ -126,7 +127,7 @@ public class FxUserInterface {
             setupMatrixTable(generatingMatrixTable, G, k, n);
             H = encoderDecoder.generateParityCheckMatrix(G);
             setupMatrixTable(parityCheckMatrixTable, H, n - k, n);
-            List<CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H);
+            cosetLeaders = encoderDecoder.findCosetLeaders(H, 2);
             setupCosetLeaderTable(cosetLeaders);
 
             textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
@@ -137,7 +138,7 @@ public class FxUserInterface {
         }
     }
 
-    private void setupCosetLeaderTable(List<CosetLeader> cosetLeaders) {
+    private void setupCosetLeaderTable(Map<String, CosetLeader> cosetLeaders) {
         cosetLeaderTable.getColumns().clear();
         cosetLeaderTable.getItems().clear();
 
@@ -145,15 +146,16 @@ public class FxUserInterface {
         syndromeColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(Arrays.toString(cellData.getValue().syndrome())));
         cosetLeaderTable.getColumns().add(syndromeColumn);
 
-        TableColumn<CosetLeader, String> cosetLeaderColumn = new TableColumn<>("Error Pattern");
-        cosetLeaderColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(Arrays.toString(cellData.getValue().errorPattern())));
-        cosetLeaderTable.getColumns().add(cosetLeaderColumn);
+        TableColumn<CosetLeader, String> errorPatternColumn = new TableColumn<>("Error Pattern");
+        errorPatternColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(Arrays.toString(cellData.getValue().errorPattern())));
+        cosetLeaderTable.getColumns().add(errorPatternColumn);
 
-        TableColumn<CosetLeader, String> errorColumn = new TableColumn<>("Weight");
-        errorColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().weight()).asString());
-        cosetLeaderTable.getColumns().add(errorColumn);
+        TableColumn<CosetLeader, String> weightColumn = new TableColumn<>("Weight");
+        weightColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().weight()).asString());
+        cosetLeaderTable.getColumns().add(weightColumn);
 
-        cosetLeaderTable.getItems().addAll(cosetLeaders);
+        cosetLeaderTable.getItems().addAll(cosetLeaders.values());
+        cosetLeaderTable.getSortOrder().add(weightColumn);
         totalCosetLeaders.setText(String.valueOf(cosetLeaders.size()));
     }
 
@@ -204,7 +206,6 @@ public class FxUserInterface {
     }
 
     private int[] getBlockFromInputBits() {
-        int[] inputBits = getBitsFromInput();
         int end = Math.min(currentBitPosition + k, inputBits.length);
         int[] block = Arrays.copyOfRange(inputBits, currentBitPosition, end);
         currentBitPosition = end;
@@ -215,9 +216,9 @@ public class FxUserInterface {
     }
 
     private int[] getBitsFromInput() {
-        String input = inputField.getText();
+        String input = inputTextField.getText();
         return switch (inputTypeComboBox.getValue()) {
-            case "Vector" -> parseInputToBits(inputField);
+            case "Vector" -> parseInputToBits(inputTextField.getText());
             case "Text" -> textProcessor.getBitRepresentation(input);
             case "Image" -> imageProcessor.getBitRepresentation(input);
             default -> new int[0];
@@ -228,12 +229,11 @@ public class FxUserInterface {
     public void encodeBlock() {
         try {
             clearResults();
-            notEncodedBits = getBlockFromInputBits();
-            encodedBits = encoderDecoder.encode(notEncodedBits, G);
-
-            blockLabel.setText("Current Block (m): " + Arrays.toString(notEncodedBits));
-            encodedInputTextField.setText(Arrays.toString(encodedBits));
-            notEncodedInputTextField.setText(Arrays.toString(notEncodedBits));
+            block = getBlockFromInputBits();
+            letterLabel.setText("Letter: " + Processor.getStringFromBits(block));
+            currentBlockLabel.setText("Current Block (m): " + Arrays.toString(block));
+            block = encoderDecoder.encode(block, G);
+            encodedBlockTextField.setText(Arrays.toString(block));
         } catch (Exception e) {
             showAlert("Error", "Failed to encode block. Please check your input.");
         }
@@ -242,13 +242,14 @@ public class FxUserInterface {
     @FXML
     public void sendBlock() {
         try {
-            receivedBitsForEncoded = encoderDecoder.introduceErrors(encodedBits, pe, q);
-            receivedBitsForNotEncoded = encoderDecoder.introduceErrors(notEncodedBits, pe, q);
+            int currentErrorsCount = encoderDecoder.getIntroducedErrors();
+            block = encodedBlockTextField.getText().isEmpty() ? block : parseInputToBits(encodedBlockTextField.getText());
+            block = encoderDecoder.introduceErrors(block, pe, q);
 
-            errorLabel.setText("Errors: " + encoderDecoder.getIntroducedErrors());
-            errorPositionLabel.setText("Error Positions: " + encoderDecoder.getErrorPositions().toString());
-            receivedBitsEncodedTextField.setText(Arrays.toString(receivedBitsForEncoded));
-            receivedNotEncodedTextField.setText(Arrays.toString(receivedBitsForNotEncoded));
+            introducedErrorCountLabel.setText("Introduced Errors: " + (encoderDecoder.getIntroducedErrors() - currentErrorsCount));
+            errorCountLabel.setText("Errors: " + encoderDecoder.getIntroducedErrors());
+            errorPositionsLabel.setText("Error Positions: " + encoderDecoder.getErrorPositions().toString());
+            receivedBlockTextField.setText(Arrays.toString(block));
         } catch (Exception e) {
             showAlert("Error", "Failed to send block. Please check your encoded data.");
         }
@@ -257,45 +258,48 @@ public class FxUserInterface {
     @FXML
     public void decodeBlock() {
         try {
-            receivedBitsForEncoded = parseInputToBits(receivedBitsEncodedTextField);
-            receivedBitsForNotEncoded = parseInputToBits(receivedNotEncodedTextField);
+            int currentFixedErrors = encoderDecoder.getFixedErrors();
+            block = receivedBlockTextField.getText().isEmpty() ? block : parseInputToBits(receivedBlockTextField.getText());
 
-            int[] correctedEncoded = encoderDecoder.decode(receivedBitsForEncoded, H, encoderDecoder.findCosetLeaders(H));
-            int[] correctedNotEncoded = encoderDecoder.decode(receivedBitsForNotEncoded, H, encoderDecoder.findCosetLeaders(H));
+            block = encoderDecoder.decodeStepByStep(block, H, cosetLeaders);
+            correctedBlockTextField.setText(Arrays.toString(block));
 
             int[] decodedEncodedBits = new int[k];
-            System.arraycopy(correctedEncoded, 0, decodedEncodedBits, 0, k);
-
-            int[] decodedNotEncodedBits = new int[k];
-            System.arraycopy(correctedNotEncoded, 0, decodedNotEncodedBits, 0, k);
+            System.arraycopy(block, 0, decodedEncodedBits, 0, k);
 
             decodedBlocks.add(decodedEncodedBits);
-            decodedTextLabel.setText("Decoded Text: " + getDecodedText());
-            correctedEncodedTextField.setText(Arrays.toString(correctedEncoded));
-            correctedNotEncodedTextField.setText(Arrays.toString(correctedNotEncoded));
-            decodedEncodedTextField.setText(Arrays.toString(decodedEncodedBits));
-            decodedNotEncodedTextField.setText(Arrays.toString(decodedNotEncodedBits));
+            decodedBlockTextField.setText(Arrays.toString(decodedEncodedBits));
+            if (inputTypeComboBox.getValue().equals("Image")) {
+                decodedTextLabel.setText("Decoded Image (img/img_decoded.png)");
+                imageProcessor.writeImage(decodedEncodedBits);
+            } else {
+                decodedTextLabel.setText("Decoded Text: " + getDecodedText());
+            }
+            errorsFixedLabel.setText("Errors Fixed: " + (encoderDecoder.getFixedErrors() - currentFixedErrors));
+            totalFixedErrorsLabel.setText("Total Fixed Errors: " + encoderDecoder.getFixedErrors());
         } catch (Exception e) {
             showAlert("Error", "Failed to decode block. Please check your received data.");
         }
     }
 
     private String getDecodedText() {
-        StringBuilder decodedText = new StringBuilder();
-        for (int[] block : decodedBlocks) {
-            decodedText.append(Processor.getStringFromBits(block));
-        }
-        return decodedText.toString();
+        List<Integer> allBits = decodedBlocks.stream()
+                .flatMapToInt(Arrays::stream).boxed()
+                .toList();
+
+        int[] allBitsArray = allBits.stream().mapToInt(Integer::intValue).toArray();
+        return Processor.getStringFromBits(allBitsArray).toString();
     }
 
     @FXML
     public void processBlock() {
+        inputBits = getBitsFromInput();
         if (debugMode) {
             encodeBlock();
             sendBlock();
             decodeBlock();
         } else {
-            while (currentBitPosition < getBitsFromInput().length) {
+            while (currentBitPosition < inputBits.length) {
                 encodeBlock();
                 sendBlock();
                 decodeBlock();
@@ -303,8 +307,7 @@ public class FxUserInterface {
         }
     }
 
-    private int[] parseInputToBits(TextField inputField) {
-        String input = inputField.getText();
+    private int[] parseInputToBits(String input) {
         return Arrays.stream(input.replaceAll("[\\[\\]]", "").split(",\\s*"))
                 .mapToInt(Integer::parseInt)
                 .toArray();
@@ -337,15 +340,33 @@ public class FxUserInterface {
     }
 
     private void clearResults() {
-        receivedBitsEncodedTextField.clear();
-        receivedNotEncodedTextField.clear();
-        correctedEncodedTextField.clear();
-        correctedNotEncodedTextField.clear();
-        decodedEncodedTextField.clear();
-        decodedNotEncodedTextField.clear();
-        decodedTextLabel.setText("Decoded Text:");
-        currentBitPosition = 0;
+        encodedBlockTextField.clear();
+        receivedBlockTextField.clear();
+        correctedBlockTextField.clear();
+        decodedBlockTextField.clear();
         encoderDecoder.clearErrors();
         encoderDecoder.clearErrorPositions();
+
+        letterLabel.setText("Letter: -");
+        currentBlockLabel.setText("Current Block (m):");
+        errorPositionsLabel.setText("Error Positions: []");
+        introducedErrorCountLabel.setText("Introduced Errors: 0");
+    }
+
+    public void setInput() {
+        clearResults();
+        decodedBlocks.clear();
+        currentBitPosition = 0;
+        decodedTextLabel.setText("Decoded Text:");
+        totalFixedErrorsLabel.setText("Total Fixed Errors: 0");
+        errorCountLabel.setText("Errors Total: 0");
+        errorsFixedLabel.setText("Errors Fixed: 0");
+
+        if (G == null) {
+            showAlert("Error", "Please generate a matrix first.");
+            return;
+        }
+        inputBits = getBitsFromInput();
+        inputTextLabel.setText("Input Text: " + inputTextField.getText());
     }
 }

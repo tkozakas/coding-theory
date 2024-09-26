@@ -40,4 +40,46 @@ public class ImageProcessor extends Processor {
             return new int[0];
         }
     }
+
+    public void writeImage(int[] decodedEncodedBits) {
+        try {
+            int width = 256;
+            int height = 256;
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+            List<Integer> rgbList = getRgbList(decodedEncodedBits);
+
+            int index = 0;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int red = rgbList.get(index++);
+                    int green = rgbList.get(index++);
+                    int blue = rgbList.get(index++);
+                    int rgb = (red << 16) | (green << 8) | blue;
+                    image.setRGB(x, y, rgb);
+                }
+            }
+            ImageIO.write(image, "png", new File("img/img_decoded.png"));
+        } catch (IOException e) {
+            System.out.println("Error writing image: " + e.getMessage());
+        }
+    }
+
+    private static List<Integer> getRgbList(int[] decodedEncodedBits) {
+        List<Integer> rgbList = new ArrayList<>();
+        for (int i = 0; i < decodedEncodedBits.length; i += 24) {
+            int red = 0;
+            int green = 0;
+            int blue = 0;
+            for (int j = 0; j < 8; j++) {
+                red = (red << 1) | decodedEncodedBits[i + j];
+                green = (green << 1) | decodedEncodedBits[i + 8 + j];
+                blue = (blue << 1) | decodedEncodedBits[i + 16 + j];
+            }
+            rgbList.add(red);
+            rgbList.add(green);
+            rgbList.add(blue);
+        }
+        return rgbList;
+    }
 }
