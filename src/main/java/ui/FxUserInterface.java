@@ -186,10 +186,6 @@ public class FxUserInterface {
             sendEncodedBlock();
             decodeBlock();
         } while (data.getCurrentBitPosition() < data.getInputBits().length);
-        showAlert("All blocks have been processed.");
-        if (inputTypeComboBox.getValue().equals("Image")) {
-            data.writeImage();
-        }
         data.setCurrentBitPosition(0);
     }
 

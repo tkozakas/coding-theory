@@ -1,8 +1,8 @@
 package processor;
 
 public class TextProcessor extends Processor {
-    public TextProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
-        super(encoderDecoder, G, pe, q);
+    public TextProcessor(EncoderDecoder encoderDecoder) {
+        super(encoderDecoder);
     }
 
     public static int[] getBitRepresentation(String text) {

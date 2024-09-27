@@ -1,21 +1,10 @@
 package processor;
 
-import model.CosetLeader;
-
-import java.util.Arrays;
-import java.util.Map;
-
 public class Processor {
     protected final processor.EncoderDecoder encoderDecoder;
-    private final double pe;
-    private final int[][] G;
-    private final int q;
 
-    public Processor(processor.EncoderDecoder encoderDecoder, int[][] G, double pe, int q) {
+    public Processor(processor.EncoderDecoder encoderDecoder) {
         this.encoderDecoder = encoderDecoder;
-        this.pe = pe;
-        this.q = q;
-        this.G = G;
     }
 
     public static StringBuilder getStringFromBits(int[] bits) {
@@ -34,16 +23,4 @@ public class Processor {
         return decodedText;
     }
 
-    public int[] processBlock(int[] m, int k) {
-        int[] c = encoderDecoder.encode(m, G);
-        int[] r = encoderDecoder.introduceErrors(c, pe, q);
-        int[][] H = EncoderDecoder.generateParityCheckMatrix(G);
-        Map<String, CosetLeader> cosetLeaders = EncoderDecoder.findCosetLeaders(H, 2);
-        int[] corrected = encoderDecoder.decodeStepByStep(r, H, cosetLeaders);
-        int[] decoded = new int[k];
-        System.arraycopy(corrected, 0, decoded, 0, k);
-        System.out.println("\n=========================================\n");
-        System.out.printf("Decoded message (m): %s (%s)%n", getStringFromBits(decoded), Arrays.toString(decoded));
-        return decoded;
-    }
 }

@@ -9,8 +9,8 @@ import java.util.List;
 
 public class ImageProcessor extends Processor {
 
-    public ImageProcessor(EncoderDecoder encoderDecoder, int[][] G, int k, double pe, int q) {
-        super(encoderDecoder, G, pe, q);
+    public ImageProcessor(EncoderDecoder encoderDecoder, int[][] G, double pe, int q) {
+        super(encoderDecoder);
     }
 
     public static int[] getBitRepresentation(String inputPath) {

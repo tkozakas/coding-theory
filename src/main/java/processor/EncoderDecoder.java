@@ -89,14 +89,7 @@ public class EncoderDecoder {
         System.out.println("Transmitted vector with errors (r): " + Arrays.toString(r));
         return r;
     }
-
-    /**
-     * Generates a random generator matrix G.
-     *
-     * @param k message length
-     * @param n codeword length
-     * @return generator matrix
-     */
+    
     public static int[][] generateGeneratingMatrix(int k, int n) {
         int[][] matrix = new int[k][n];
         for (int i = 0; i < k; i++) {
@@ -112,8 +105,6 @@ public class EncoderDecoder {
 
     /**
      * Generates the parity-check matrix H from the generator matrix G.
-     * @param G generator matrix
-     * @return parity-check matrix
      * G = [I_k | P]
      * H = [P^T | I_(n-k)]
      */
@@ -164,12 +155,8 @@ public class EncoderDecoder {
     public static Map<String, CosetLeader> findCosetLeaders(int[][] H, int maxWeight) {
         int n = H[0].length; // Number of columns in H
         int m = H.length;    // Number of rows in H (syndrome length)
-        int totalSyndromes = 1 << m; // Total possible syndromes (2^m)
-
-        // Use LinkedHashMap to preserve the order of insertion (syndromes)
+        
         Map<String, CosetLeader> cosetLeadersMap = new LinkedHashMap<>();
-
-        // Initialize coset leaders with maximum weight (n + 1), assuming no error pattern yet
         initializeCosetLeaders(cosetLeadersMap, m, n);
 
         if (debug) {
@@ -242,7 +229,7 @@ public class EncoderDecoder {
 
     public static int[] decodeStepByStep(int[] r, int[][] H, Map<String, CosetLeader> cosetLeadersMap) {
         int n = r.length;
-        int i = 0; // zero-based index
+        int i = 0;
         int[] rCopy = Arrays.copyOf(r, n);
 
         while (true) {
@@ -252,7 +239,6 @@ public class EncoderDecoder {
             int w = (cosetLeader != null) ? cosetLeader.weight() : n + 1;
 
             if (w == 0) {
-                // rCopy is a codeword
                 if (debug) {
                     System.out.println("Corrected codeword: " + Arrays.toString(rCopy));
                 }
@@ -295,13 +281,5 @@ public class EncoderDecoder {
         }
         System.out.println(stringBuilder);
         return stringBuilder;
-    }
-
-    public boolean isDebug() {
-        return debug;
-    }
-
-    public void setDebug(boolean debug) {
-        EncoderDecoder.debug = debug;
     }
 }
