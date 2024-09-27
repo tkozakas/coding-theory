@@ -3,7 +3,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import ui.Data;
+import ui.UserInterface;
 
 import java.io.IOException;
 
@@ -21,5 +21,6 @@ public class Main extends Application {
         if (args.length > 0 && args[0].equals("ui")) {
             launch(args);
         }
+        new UserInterface().start();
     }
 }

@@ -288,10 +288,13 @@ public class EncoderDecoder {
         }
     }
 
-    private static void printMatrix(int[][] matrix) {
+    public static StringBuilder printMatrix(int[][] matrix) {
+        StringBuilder stringBuilder = new StringBuilder();
         for (int[] row : matrix) {
-            System.out.println(Arrays.toString(row));
+            stringBuilder.append(Arrays.toString(row)).append("\n");
         }
+        System.out.println(stringBuilder);
+        return stringBuilder;
     }
 
     public boolean isDebug() {
