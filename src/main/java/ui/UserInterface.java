@@ -68,8 +68,7 @@ public class UserInterface {
                 case 1 -> processVector();
                 case 2 -> processText();
                 case 3 -> processImage();
-                case 4 -> generateMatrix();
-                case 5 -> {
+                case 4 -> {
                     System.out.println("Exiting...");
                     return;
                 }
@@ -84,8 +83,7 @@ public class UserInterface {
                 1. Process Vector
                 2. Process Text
                 3. Process Image
-                4. Generate new matrix
-                5. Back to main menu
+                4. Back to main menu
                 Choice:\s""");
     }
 
