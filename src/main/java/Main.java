@@ -9,7 +9,7 @@ import java.io.IOException;
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/FxUserInterface.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/MainSplitPane.fxml"));
         Parent root = loader.load();
         stage.setTitle("Error Correcting Code");
         stage.setScene(new Scene(root));

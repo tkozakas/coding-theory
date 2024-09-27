@@ -127,7 +127,7 @@ public class UserInterface {
         k = scanner.nextInt();
         scanner.nextLine();
 
-        G = encoderDecoder.generateGeneratingMatrix(k, n);
+        G = EncoderDecoder.generateGeneratingMatrix(k, n);
         mainMenu();
     }
 
@@ -196,7 +196,7 @@ public class UserInterface {
         System.out.println("Enter the text to encode:");
         String text = scanner.nextLine();
 
-        bits = textProcessor.getBitRepresentation(text);
+        bits = TextProcessor.getBitRepresentation(text);
 
         textProcessor = new TextProcessor(encoderDecoder, G, k, pe, q);
         while (currentBitPosition < bits.length) {
@@ -212,7 +212,7 @@ public class UserInterface {
         System.out.println("Enter the path to the image file:");
         String inputPath = scanner.nextLine();
 
-        bits = imageProcessor.getBitRepresentation(inputPath);
+        bits = ImageProcessor.getBitRepresentation(inputPath);
 
         imageProcessor = new ImageProcessor(encoderDecoder, G, k, pe, q);
         while (currentBitPosition < bits.length) {

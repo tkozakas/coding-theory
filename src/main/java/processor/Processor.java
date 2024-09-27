@@ -37,8 +37,8 @@ public class Processor {
     public int[] processBlock(int[] m, int k) {
         int[] c = encoderDecoder.encode(m, G);
         int[] r = encoderDecoder.introduceErrors(c, pe, q);
-        int[][] H = encoderDecoder.generateParityCheckMatrix(G);
-        Map<String, CosetLeader> cosetLeaders = encoderDecoder.findCosetLeaders(H, 2);
+        int[][] H = EncoderDecoder.generateParityCheckMatrix(G);
+        Map<String, CosetLeader> cosetLeaders = EncoderDecoder.findCosetLeaders(H, 2);
         int[] corrected = encoderDecoder.decodeStepByStep(r, H, cosetLeaders);
         int[] decoded = new int[k];
         System.arraycopy(corrected, 0, decoded, 0, k);

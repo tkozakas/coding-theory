@@ -5,7 +5,7 @@ public class TextProcessor extends Processor {
         super(encoderDecoder, G, pe, q);
     }
 
-    public int[] getBitRepresentation(String text) {
+    public static int[] getBitRepresentation(String text) {
         StringBuilder bitStringBuilder = new StringBuilder();
         for (char c : text.toCharArray()) {
             String binaryString = String.format("%8s", Integer.toBinaryString(c)).replace(' ', '0');

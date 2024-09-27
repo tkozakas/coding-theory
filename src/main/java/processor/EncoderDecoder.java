@@ -5,11 +5,8 @@ import model.CosetLeader;
 import java.util.*;
 
 public class EncoderDecoder {
-    private final Random random = new Random();
-    private boolean debug;
-    private int introducedErrors = 0;
-    private int fixedErrors = 0;
-    private final List<Integer> errorPositions = new ArrayList<>();
+    private final static Random random = new Random();
+    private static boolean debug = true;
 
     /**
      * Encodes a message using the generator matrix G.
@@ -18,7 +15,7 @@ public class EncoderDecoder {
      * @param G generator matrix
      * @return encoded message
      */
-    public int[] encode(int[] m, int[][] G) {
+    public static int[] encode(int[] m, int[][] G) {
         StringBuilder message = Processor.getStringFromBits(m);
         System.out.println("\n=========================================\n");
         System.out.printf("Encoding message (m): %s (%s)%n", Arrays.toString(m), message);
@@ -40,7 +37,7 @@ public class EncoderDecoder {
      * @param G matrix
      * @return result of the multiplication
      */
-    private int[] matrixVectorMultiply(int[] m, int[][] G) {
+    private static int[] matrixVectorMultiply(int[] m, int[][] G) {
         int[] c = new int[G[0].length];
         for (int i = 0; i < G[0].length; i++) {
             for (int j = 0; j < m.length; j++) {
@@ -58,7 +55,7 @@ public class EncoderDecoder {
      * @param q number of symbols in the alphabet
      * @return codeword with errors
      */
-    public int[] introduceErrors(int[] c, double pe, int q) {
+    public static int[] introduceErrors(int[] c, double pe, int q) {
         int[] r = Arrays.copyOf(c, c.length);
 
         if (debug) {
@@ -71,8 +68,6 @@ public class EncoderDecoder {
             if (a < pe) {
                 if (q == 2) {
                     r[i] ^= 1; // Flip the bit
-                    introducedErrors++;
-                    errorPositions.add(i);
                 } else if (q > 2) {
                     // Change the symbol to a random one
                     int currentSymbol = r[i];
@@ -81,8 +76,6 @@ public class EncoderDecoder {
                         newSymbol = random.nextInt(q);
                     } while (newSymbol == currentSymbol);
                     r[i] = newSymbol;
-                    introducedErrors++;
-                    errorPositions.add(i);
                 } else {
                     throw new IllegalArgumentException("Invalid value for q: " + q);
                 }
@@ -104,7 +97,7 @@ public class EncoderDecoder {
      * @param n codeword length
      * @return generator matrix
      */
-    public int[][] generateGeneratingMatrix(int k, int n) {
+    public static int[][] generateGeneratingMatrix(int k, int n) {
         int[][] matrix = new int[k][n];
         for (int i = 0; i < k; i++) {
             for (int j = 0; j < k; j++) {
@@ -124,7 +117,7 @@ public class EncoderDecoder {
      * G = [I_k | P]
      * H = [P^T | I_(n-k)]
      */
-    public int[][] generateParityCheckMatrix(int[][] G) {
+    public static int[][] generateParityCheckMatrix(int[][] G) {
         int k = G.length;
         int n = G[0].length;
 
@@ -158,7 +151,7 @@ public class EncoderDecoder {
         return H;
     }
 
-    public int[] computeSyndrome(int[][] H, int[] r) {
+    public static int[] computeSyndrome(int[][] H, int[] r) {
         int[] s = new int[H.length];
         for (int i = 0; i < H.length; i++) {
             for (int j = 0; j < H[0].length; j++) {
@@ -168,7 +161,7 @@ public class EncoderDecoder {
         return s;
     }
 
-    public Map<String, CosetLeader> findCosetLeaders(int[][] H, int maxWeight) {
+    public static Map<String, CosetLeader> findCosetLeaders(int[][] H, int maxWeight) {
         int n = H[0].length; // Number of columns in H
         int m = H.length;    // Number of rows in H (syndrome length)
         int totalSyndromes = 1 << m; // Total possible syndromes (2^m)
@@ -200,7 +193,7 @@ public class EncoderDecoder {
         return cosetLeadersMap;
     }
 
-    private void initializeCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int m, int n) {
+    private static void initializeCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int m, int n) {
         int totalSyndromes = 1 << m;
         for (int i = 0; i < totalSyndromes; i++) {
             int[] syndrome = new int[m];
@@ -212,7 +205,7 @@ public class EncoderDecoder {
         }
     }
 
-    private void updateCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int[][] H, List<int[]> errorPatterns, int weight) {
+    private static void updateCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int[][] H, List<int[]> errorPatterns, int weight) {
         for (int[] errorPattern : errorPatterns) {
             int[] syndrome = computeSyndrome(H, errorPattern);
             String syndromeStr = Arrays.toString(syndrome);
@@ -228,14 +221,14 @@ public class EncoderDecoder {
         }
     }
 
-    private List<int[]> generateErrorPatterns(int n, int w) {
+    private static List<int[]> generateErrorPatterns(int n, int w) {
         List<int[]> patterns = new ArrayList<>();
         int[] pattern = new int[n];
         generateErrorPatternsRecursive(patterns, pattern, 0, 0, w);
         return patterns;
     }
 
-    private void generateErrorPatternsRecursive(List<int[]> patterns, int[] pattern, int start, int ones, int w) {
+    private static void generateErrorPatternsRecursive(List<int[]> patterns, int[] pattern, int start, int ones, int w) {
         if (ones == w) {
             patterns.add(pattern.clone());
             return;
@@ -247,7 +240,7 @@ public class EncoderDecoder {
         }
     }
 
-    public int[] decodeStepByStep(int[] r, int[][] H, Map<String, CosetLeader> cosetLeadersMap) {
+    public static int[] decodeStepByStep(int[] r, int[][] H, Map<String, CosetLeader> cosetLeadersMap) {
         int n = r.length;
         int i = 0; // zero-based index
         int[] rCopy = Arrays.copyOf(r, n);
@@ -261,7 +254,7 @@ public class EncoderDecoder {
             if (w == 0) {
                 // rCopy is a codeword
                 if (debug) {
-                    System.out.println("Decoded codeword: " + Arrays.toString(rCopy));
+                    System.out.println("Corrected codeword: " + Arrays.toString(rCopy));
                 }
                 return rCopy;
             }
@@ -282,7 +275,6 @@ public class EncoderDecoder {
             int wNew = (cosetLeaderNew != null) ? cosetLeaderNew.weight() : n + 1;
 
             if (wNew < w) {
-                fixedErrors++;
                 if (debug) {
                     System.out.printf("Flipped bit %d, new coset leader weight %d < %d%n", i + 1, wNew, w);
                 }
@@ -296,22 +288,10 @@ public class EncoderDecoder {
         }
     }
 
-    private void printMatrix(int[][] matrix) {
+    private static void printMatrix(int[][] matrix) {
         for (int[] row : matrix) {
             System.out.println(Arrays.toString(row));
         }
-    }
-
-    public int getIntroducedErrors() {
-        return introducedErrors;
-    }
-
-    public int getFixedErrors() {
-        return fixedErrors;
-    }
-
-    public List<Integer> getErrorPositions() {
-        return errorPositions;
     }
 
     public boolean isDebug() {
@@ -319,14 +299,6 @@ public class EncoderDecoder {
     }
 
     public void setDebug(boolean debug) {
-        this.debug = debug;
-    }
-
-    public void clearErrorPositions() {
-        errorPositions.clear();
-    }
-
-    public void clearErrors() {
-        introducedErrors = 0;
+        EncoderDecoder.debug = debug;
     }
 }

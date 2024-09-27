@@ -13,7 +13,7 @@ public class ImageProcessor extends Processor {
         super(encoderDecoder, G, pe, q);
     }
 
-    public int[] getBitRepresentation(String inputPath) {
+    public static int[] getBitRepresentation(String inputPath) {
         try {
             BufferedImage image = ImageIO.read(new File(inputPath));
             int width = image.getWidth();
