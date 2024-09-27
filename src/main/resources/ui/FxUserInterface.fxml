@@ -25,26 +25,24 @@
                 <ColumnConstraints maxWidth="161.0" minWidth="100.0" prefWidth="157.0" />
                 <ColumnConstraints />
                 <ColumnConstraints />
+            <ColumnConstraints />
             </columnConstraints>
 
             <Label style="-fx-font-weight: bold;" text="Input:" GridPane.rowIndex="2" />
             <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="3">
                 <HBox spacing="10">
-                    <TextField fx:id="inputTextField" prefHeight="26.0" prefWidth="160.0" promptText="Vector (e.g., 1, 0, 1)" />
+                    <TextField fx:id="inputTextField" promptText="Vector (e.g., 1, 0, 1)" />
                 </HBox>
-                <Button onAction="#setInput" prefWidth="120" text="Set" />
             </HBox>
 
             <Label style="-fx-font-weight: bold;" text="Error Probability:" />
             <HBox spacing="10" GridPane.columnIndex="1">
                 <TextField fx:id="errorProbabilityField" prefHeight="26.0" prefWidth="160.0" promptText="Enter probability" />
-                <Button onAction="#setProbability" prefWidth="120" text="Set" />
             </HBox>
 
             <Label style="-fx-font-weight: bold;" text="Alphabet Size:" GridPane.rowIndex="1" />
             <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
                 <TextField fx:id="alphabetSizeField" prefHeight="26.0" prefWidth="160.0" promptText="Enter alphabet size" />
-                <Button onAction="#setAlphabetSize" prefWidth="120" text="Set" />
             </HBox>
             <VBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="4">
                 <Label fx:id="probabilityLabel" text="Probability (p): -" />
@@ -54,11 +52,11 @@
             <Label fx:id="letterLabel" text="Letter: -" />
             </VBox>
 
-            <Button onAction="#encodeBlock" prefWidth="100" text="Encode" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+            <Button onAction="#encodeBlock" prefWidth="100" text="Encode" GridPane.columnIndex="2" GridPane.rowIndex="4" />
 
             <Label style="-fx-font-weight: bold;" text="Encoded" GridPane.columnSpan="2" GridPane.rowIndex="5" />
 
-            <Button onAction="#sendBlock" prefWidth="100" text="Send" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+            <Button onAction="#sendBlock" prefWidth="100" text="Send" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
             <Label style="-fx-font-weight: bold;" text="With Errors" GridPane.columnSpan="2" GridPane.rowIndex="6" />
 
@@ -67,23 +65,22 @@
                 <Label fx:id="errorPositionsLabel" text="Error Positions: []" />
             </VBox>
 
-            <Button onAction="#decodeBlock" prefWidth="100" text="Decode" GridPane.columnIndex="1" GridPane.rowIndex="14" />
+            <Button onAction="#decodeBlock" prefWidth="100" text="Decode" GridPane.columnIndex="2" GridPane.rowIndex="6" />
 
             <Label style="-fx-font-weight: bold;" text="Corrected" GridPane.columnSpan="2" GridPane.rowIndex="8" />
 
             <Label style="-fx-font-weight: bold;" text="Decoded" GridPane.columnSpan="2" GridPane.rowIndex="9" />
 
-            <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="16">
-                <Button onAction="#processBlock" prefWidth="120" text="Process" />
+            <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="12">
                 <Button onAction="#toggleDebugMode" prefWidth="120" text="Toggle Debug" />
+                <Button onAction="#processBlock" prefWidth="120" text="Process" />
             </HBox>
             <TextField fx:id="encodedBlockTextField" prefWidth="155" promptText="Encoded" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             <TextField fx:id="receivedBlockTextField" prefWidth="155" promptText="With Error" GridPane.columnIndex="1" GridPane.rowIndex="6" />
             <TextField fx:id="correctedBlockTextField" prefWidth="155" promptText="Corrected" GridPane.columnIndex="1" GridPane.rowIndex="8" />
             <TextField fx:id="decodedBlockTextField" prefWidth="155" promptText="Decoded" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-            <Label style="-fx-font-weight: bold;" text="Steps" GridPane.rowIndex="11" />
-            <Label style="-fx-font-weight: bold;" text="Process" GridPane.rowIndex="15" />
-            <VBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="17">
+            <Label style="-fx-font-weight: bold;" text="Process" GridPane.rowIndex="11" />
+            <VBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="13">
                 <Label fx:id="decodedTextLabel" text="Decoded Text: -" />
             <Label fx:id="errorCountLabel" text="Errors Total: 0" />
                 <Label fx:id="totalFixedErrorsLabel" text="Total Fixed Errors: 0" />
@@ -98,6 +95,9 @@
                 </items>
             </ComboBox>
          <Label fx:id="errorsFixedLabel" text="Errors Fixed : 0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+             <Button onAction="#setAlphabetSize" prefWidth="120" text="Set" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+             <Button onAction="#setProbability" prefWidth="120" text="Set" GridPane.columnIndex="2" />
+             <Button onAction="#setInput" prefWidth="120" text="Set" GridPane.columnIndex="2" GridPane.rowIndex="3" />
             <rowConstraints>
                 <RowConstraints maxHeight="26.0" minHeight="26.0" prefHeight="26.0" />
                 <RowConstraints />
@@ -110,11 +110,7 @@
                 <RowConstraints />
                 <RowConstraints />
             <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
+                <RowConstraints maxHeight="18.0" minHeight="18.0" prefHeight="18.0" />
                 <RowConstraints />
                 <RowConstraints />
             </rowConstraints>

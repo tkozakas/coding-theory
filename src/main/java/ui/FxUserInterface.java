@@ -242,11 +242,9 @@ public class FxUserInterface {
     @FXML
     public void sendBlock() {
         try {
-            int currentErrorsCount = encoderDecoder.getIntroducedErrors();
             block = encodedBlockTextField.getText().isEmpty() ? block : parseInputToBits(encodedBlockTextField.getText());
             block = encoderDecoder.introduceErrors(block, pe, q);
 
-            introducedErrorCountLabel.setText("Introduced Errors: " + (encoderDecoder.getIntroducedErrors() - currentErrorsCount));
             errorCountLabel.setText("Errors: " + encoderDecoder.getIntroducedErrors());
             errorPositionsLabel.setText("Error Positions: " + encoderDecoder.getErrorPositions().toString());
             receivedBlockTextField.setText(Arrays.toString(block));
