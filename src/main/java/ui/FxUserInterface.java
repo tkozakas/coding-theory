@@ -27,6 +27,10 @@ public class FxUserInterface {
     public TextField errorPositionTextField;
     public TextField noCodingErrorCountTextField;
     public TextField noCodingErrorPositionTextField;
+    public TextField fixedCountTextFiled;
+    public TextField fixedPositionTextField;
+    public TextField noCodingFixedCountTextField;
+    public TextField noCodingFixedPositionTextField;
 
     public FxUserInterface() {
         this.data = Data.getInstance();
@@ -37,6 +41,51 @@ public class FxUserInterface {
         inputTypeComboBox.getSelectionModel().selectFirst();
         alphabetSizeTextField.setText(alphabetSizeTextField.getText() + data.getQ());
         errorProbabilityTextField.setText(errorProbabilityTextField.getText() + data.getPe());
+        addListeners();
+    }
+
+    private void addListeners() {
+        errorProbabilityTextField.textProperty().addListener((observable, oldValue, newValue) -> updateProbability(newValue));
+        alphabetSizeTextField.textProperty().addListener((observable, oldValue, newValue) -> updateAlphabetSize(newValue));
+        withErrorTextField.textProperty().addListener((observable, oldValue, newValue) -> updateWithErrorBlock(newValue));
+        withoutCodeErrorTextField.textProperty().addListener((observable, oldValue, newValue) -> updateWithoutCodeErrorBlock(newValue));
+    }
+
+    private int[] parseStringToBits(String newValue) {
+        return Arrays.stream(newValue.split("[\\[\\], ]+"))
+                .filter(s -> !s.isBlank())
+                .mapToInt(Integer::parseInt)
+                .toArray();
+    }
+
+    private void updateWithoutCodeErrorBlock(String newValue) {
+        if (newValue.isBlank()) {
+            return;
+        }
+        data.setBlockWithoutCodeError(parseStringToBits(newValue));
+    }
+
+    private void updateWithErrorBlock(String newValue) {
+        if (newValue.isBlank()) {
+            return;
+        }
+        data.setBlockWithError(parseStringToBits(newValue));
+    }
+
+    private void updateAlphabetSize(String newValue) {
+        if (newValue.isBlank()) {
+            showAlert("Please enter a valid alphabet size.");
+            return;
+        }
+        data.setQ(Integer.parseInt(newValue));
+    }
+
+    private void updateProbability(String newValue) {
+        if (newValue.isBlank()) {
+            showAlert("Please enter a valid error probability.");
+            return;
+        }
+        data.setPe(Double.parseDouble(newValue));
     }
 
     @FXML
@@ -85,47 +134,73 @@ public class FxUserInterface {
 
     @FXML
     public void decodeBlock() {
+        data.setBlockWithError(parseStringToBits(withErrorTextField.getText()));
+        data.setBlockWithoutCodeError(parseStringToBits(withoutCodeErrorTextField.getText()));
+        errorCountTextField.setText(String.valueOf(data.getErrorCount()));
+        errorPositionTextField.setText(Arrays.toString(data.getErrorPositions()));
+        noCodingErrorCountTextField.setText(String.valueOf(data.getNoCodingErrorCount()));
+        noCodingErrorPositionTextField.setText(Arrays.toString(data.getNoCodingErrorPositions()));
+
         data.decodeBlock();
         correctedBlockTextField.setText(Arrays.toString(data.getCorrectedBlock()));
         decodedBlockTextField.setText(Arrays.toString(data.getDecodedBlock()));
         decodedTextField.setText(String.valueOf(data.getDecodedString()));
         withoutCodingTextField.setText(String.valueOf(data.getWithoutCodingString()));
+        fixedCountTextFiled.setText(String.valueOf(data.getFixedCount()));
+        fixedPositionTextField.setText(Arrays.toString(data.getFixedPositions()));
+        noCodingFixedCountTextField.setText(String.valueOf(data.getNoCodingFixedCount()));
+        noCodingFixedPositionTextField.setText(Arrays.toString(data.getNoCodingFixedPositions()));
     }
 
-    public void setInput() {
+    public void setNextBlock() {
         String input = inputTextField.getText();
         if (input.isBlank()) {
-            showAlert("Invalid Input", "Please enter a valid input.");
+            showAlert("Please enter a valid input.");
             return;
         }
-        data.generateInputBits(inputTypeComboBox.getValue());
+        data.generateInputBits(inputTypeComboBox.getValue(), input);
         data.nextBlock();
         currentBlockTextField.setText(Arrays.toString(data.getBlock()));
     }
 
-    private void showAlert(String title, String message) {
+    private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
+        alert.setTitle("Invalid Input");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
 
-    public void setAlphabetSize() {
-        String alphabetSize = alphabetSizeTextField.getText();
-        if (alphabetSize.isBlank()) {
-            showAlert("Invalid Input", "Please enter a valid alphabet size.");
-            return;
-        }
-        data.setQ(Integer.parseInt(alphabetSize));
+    public void processInput() {
+        clearInput();
+        do {
+            setNextBlock();
+            encodeInput();
+            sendEncodedBlock();
+            decodeBlock();
+        } while (data.getCurrentBitPosition() < data.getInputBits().length);
+        data.setCurrentBitPosition(0);
     }
 
-    public void setProbability() {
-        String probability = errorProbabilityTextField.getText();
-        if (probability.isBlank()) {
-            showAlert("Invalid Input", "Please enter a valid error probability.");
-            return;
-        }
-        data.setPe(Double.parseDouble(probability));
+    public void clearInput() {
+        currentBlockTextField.clear();
+        encodedBlockTextField.clear();
+        withErrorTextField.clear();
+        correctedBlockTextField.clear();
+        decodedBlockTextField.clear();
+        withoutCodeErrorTextField.clear();
+        decodedTextField.clear();
+        withoutCodingTextField.clear();
+        errorCountTextField.clear();
+        errorPositionTextField.clear();
+        noCodingErrorCountTextField.clear();
+        noCodingErrorPositionTextField.clear();
+        fixedCountTextFiled.clear();
+        fixedPositionTextField.clear();
+        noCodingFixedCountTextField.clear();
+        noCodingFixedPositionTextField.clear();
+        data.getDecodedBlocks().clear();
+        data.getBlocksWithoutCode().clear();
+        data.setCurrentBitPosition(0);
     }
 }

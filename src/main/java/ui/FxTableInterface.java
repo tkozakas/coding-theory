@@ -29,8 +29,8 @@ public class FxTableInterface {
         data.setN(Integer.parseInt(columnsField.getText()));
         data.setK(Integer.parseInt(rowsField.getText()));
 
-        if (data.getN() < data.getK()) {
-            showAlert("The number of rows (k) should be less than or equal to the number of columns (n).");
+        if (data.getN() <= data.getK()) {
+            showAlert("The number of rows (k) should be less or equal to the number of columns (n).");
             return;
         }
 
@@ -70,6 +70,7 @@ public class FxTableInterface {
             if (newValue != null && (newValue == 0 || newValue == 1)) {
                 row[currentCol] = newValue;
                 data.getG()[event.getTablePosition().getRow()][currentCol] = newValue;
+                data.setG(data.getG());
                 updateMatrix();
             } else {
                 showAlert("Please enter only 0 or 1.");

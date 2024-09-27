@@ -59,8 +59,8 @@ public class Data {
         cosetLeaders = EncoderDecoder.findCosetLeaders(H, q);
     }
 
-    public void generateInputBits(String input) {
-        inputBits = switch (input) {
+    public void generateInputBits(String inputType, String input) {
+        inputBits = switch (inputType) {
             case "Vector" -> Arrays.stream(input.split(","))
                     .map(String::trim)
                     .mapToInt(Integer::parseInt)
@@ -87,7 +87,6 @@ public class Data {
     public void introduceErrors() {
         blockWithError = EncoderDecoder.introduceErrors(encodedBlock, pe, q);
         blockWithoutCodeError = EncoderDecoder.introduceErrors(block, pe, q);
-        blocksWithoutCode.add(blockWithoutCodeError);
     }
 
     public void decodeBlock() {
@@ -95,41 +94,77 @@ public class Data {
         decodedBlock = Arrays.copyOf(correctedBlock, k);
         System.out.println("Decoded codeword: " + Arrays.toString(decodedBlock));
         decodedBlocks.add(decodedBlock);
+        blocksWithoutCode.add(blockWithoutCodeError);
     }
 
     public int getErrorCount() {
-        return (int) IntStream.range(0, blockWithError.length)
-                .filter(i -> blockWithError[i] != encodedBlock[i])
-                .count();
+        return getErrorCount(blockWithError, encodedBlock);
     }
 
     public int[] getErrorPositions() {
-        return IntStream.range(0, blockWithError.length)
-                .filter(i -> blockWithError[i] != encodedBlock[i])
-                .toArray();
+        return getErrorPositions(blockWithError, encodedBlock);
     }
 
     public int[] getNoCodingErrorPositions() {
-        return IntStream.range(0, blockWithoutCodeError.length)
-                .filter(i -> blockWithoutCodeError[i] != block[i])
-                .toArray();
+        return getErrorPositions(blockWithoutCodeError, block);
     }
 
     public int getNoCodingErrorCount() {
-        return (int) IntStream.range(0, blockWithoutCodeError.length)
-                .filter(i -> blockWithoutCodeError[i] != block[i])
-                .count();
+        return getErrorCount(blockWithoutCodeError, block);
     }
 
     public StringBuilder getDecodedString() {
-        return Processor.getStringFromBits(decodedBlocks.stream()
+        return getStringFromBlocks(decodedBlocks);
+    }
+
+    public StringBuilder getWithoutCodingString() {
+        return getStringFromBlocks(blocksWithoutCode);
+    }
+
+    public int getFixedCount() {
+        return getFixedCount(decodedBlock, block);
+    }
+
+    public int[] getFixedPositions() {
+        return getFixedPositions(decodedBlock, block);
+    }
+
+    public int getNoCodingFixedCount() {
+        return getFixedCount(blockWithoutCodeError, block);
+    }
+
+    public int[] getNoCodingFixedPositions() {
+        return getFixedPositions(blockWithoutCodeError, block);
+    }
+
+    private int getErrorCount(int[] array1, int[] array2) {
+        return (int) IntStream.range(0, array1.length)
+                .filter(i -> array1[i] != array2[i])
+                .count();
+    }
+
+    private int[] getErrorPositions(int[] array1, int[] array2) {
+        return IntStream.range(0, array1.length)
+                .filter(i -> array1[i] != array2[i])
+                .toArray();
+    }
+
+    private int getFixedCount(int[] array1, int[] array2) {
+        return (int) IntStream.range(0, array1.length)
+                .filter(i -> array1[i] == array2[i] && array1[i] != blockWithError[i])
+                .count();
+    }
+
+    private int[] getFixedPositions(int[] array1, int[] array2) {
+        return IntStream.range(0, array1.length)
+                .filter(i -> array1[i] == array2[i] && array1[i] != blockWithError[i])
+                .toArray();
+    }
+
+    private StringBuilder getStringFromBlocks(List<int[]> blocks) {
+        return Processor.getStringFromBits(blocks.stream()
                 .flatMapToInt(Arrays::stream)
                 .toArray());
     }
 
-    public StringBuilder getWithoutCodingString() {
-        return Processor.getStringFromBits(blocksWithoutCode.stream()
-                .flatMapToInt(Arrays::stream)
-                .toArray());
-    }
 }
