@@ -150,6 +150,13 @@ public class FxUserInterface {
         fixedPositionTextField.setText(Arrays.toString(data.getFixedPositions()));
         noCodingFixedCountTextField.setText(String.valueOf(data.getNoCodingFixedCount()));
         noCodingFixedPositionTextField.setText(Arrays.toString(data.getNoCodingFixedPositions()));
+
+        if (data.getCurrentBitPosition() >= data.getInputBits().length) {
+            showAlert("All blocks have been processed.");
+            if (inputTypeComboBox.getValue().equals("Image")) {
+                data.writeImage();
+            }
+        }
     }
 
     public void setNextBlock() {
@@ -179,6 +186,10 @@ public class FxUserInterface {
             sendEncodedBlock();
             decodeBlock();
         } while (data.getCurrentBitPosition() < data.getInputBits().length);
+        showAlert("All blocks have been processed.");
+        if (inputTypeComboBox.getValue().equals("Image")) {
+            data.writeImage();
+        }
         data.setCurrentBitPosition(0);
     }
 

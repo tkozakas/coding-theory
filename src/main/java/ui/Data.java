@@ -167,4 +167,9 @@ public class Data {
                 .toArray());
     }
 
+    public void writeImage() {
+        ImageProcessor.writeImage(decodedBlocks.stream()
+                .flatMapToInt(Arrays::stream)
+                .toArray());
+    }
 }

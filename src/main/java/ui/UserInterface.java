@@ -8,6 +8,7 @@ import java.util.Scanner;
 public class UserInterface {
     private final Scanner scanner = new Scanner(System.in);
     private final Data data = Data.getInstance();
+    private String inputType;
 
     public void start() {
         mainMenu();
@@ -154,23 +155,26 @@ public class UserInterface {
     }
 
     private void processVector() {
+        inputType = "Vector";
         System.out.println("Enter the vector to encode:");
         String vector = scanner.nextLine();
-        data.generateInputBits("Vector", vector);
+        data.generateInputBits(inputType, vector);
         processInputBlocks();
     }
 
     private void processText() {
+        inputType = "Text";
         System.out.println("Enter the text to encode:");
         String text = scanner.nextLine();
-        data.generateInputBits("Text", text);
+        data.generateInputBits(inputType, text);
         processInputBlocks();
     }
 
     private void processImage() {
+        inputType = "Image";
         System.out.println("Enter the path to the image file:");
         String imagePath = scanner.nextLine();
-        data.generateInputBits("Image", imagePath);
+        data.generateInputBits(inputType, imagePath);
         processInputBlocks();
     }
 
@@ -181,7 +185,9 @@ public class UserInterface {
             data.introduceErrors();
             data.decodeBlock();
         }
-        System.out.println("Decoded text: " + data.getDecodedString());
+        System.out.println(inputType.equals("Image") ?
+                "Decoded image saved as img/img_decoded.png" :
+                "Decoded text: " + data.getDecodedString());
     }
 
     private int getUserChoice() {

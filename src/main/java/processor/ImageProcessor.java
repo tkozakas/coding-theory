@@ -41,7 +41,7 @@ public class ImageProcessor extends Processor {
         }
     }
 
-    public void writeImage(int[] decodedEncodedBits) {
+    public static void writeImage(int[] decodedEncodedBits) {
         try {
             int width = 256;
             int height = 256;
