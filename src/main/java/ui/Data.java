@@ -56,7 +56,7 @@ public class Data {
     }
 
     public void generateCosetLeaders() {
-        cosetLeaders = EncoderDecoder.findCosetLeaders(H, q);
+        cosetLeaders = EncoderDecoder.findCosetLeaders(H);
     }
 
     public void generateInputBits(String inputType, String input) {
