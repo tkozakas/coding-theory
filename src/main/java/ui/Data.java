@@ -14,7 +14,6 @@ import java.util.stream.IntStream;
 
 @Getter
 @Setter
-@Accessors(chain = true)
 public class Data {
     private static Data instance;
 
@@ -36,9 +35,6 @@ public class Data {
     private int currentBitPosition = 0;
     private Map<String, CosetLeader> cosetLeaders = new HashMap<>();
     private boolean debugMode = false;
-
-    private Data() {
-    }
 
     public static Data getInstance() {
         if (instance == null) {
