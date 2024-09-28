@@ -1,11 +1,13 @@
 package ui;
 
 import processor.EncoderDecoder;
+import processor.Experiment;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class UserInterface {
+    private final Experiment experiment = new Experiment();
     private final Scanner scanner = new Scanner(System.in);
     private final Data data = Data.getInstance();
     private String inputType;
@@ -26,7 +28,7 @@ public class UserInterface {
                 case 4 -> changeProbability();
                 case 5 -> changeAlphabetSize();
                 case 6 -> toggleDebugMode();
-                case 7 -> experiments();
+                case 7 -> experiment.run();
                 default -> System.out.println("Invalid choice. Please try again.");
             }
         }
@@ -148,10 +150,6 @@ public class UserInterface {
 
     private void toggleDebugMode() {
         data.setDebugMode(!data.isDebugMode());
-    }
-
-    private void experiments() {
-        // TODO Implement experiments
     }
 
     private void processVector() {
