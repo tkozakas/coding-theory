@@ -170,6 +170,9 @@ public class Data {
     public void writeImage() {
         ImageProcessor.writeImage(decodedBlocks.stream()
                 .flatMapToInt(Arrays::stream)
-                .toArray());
+                .toArray(), "img/img_decoded.png");
+        ImageProcessor.writeImage(blocksWithoutCode.stream()
+                .flatMapToInt(Arrays::stream)
+                .toArray(), "img/img_without_code.png");
     }
 }

@@ -8,11 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ImageProcessor extends Processor {
-
-    public ImageProcessor(EncoderDecoder encoderDecoder, int[][] G, double pe, int q) {
-        super(encoderDecoder);
-    }
-
     public static int[] getBitRepresentation(String inputPath) {
         try {
             BufferedImage image = ImageIO.read(new File(inputPath));
@@ -41,7 +36,7 @@ public class ImageProcessor extends Processor {
         }
     }
 
-    public static void writeImage(int[] decodedEncodedBits) {
+    public static void writeImage(int[] decodedEncodedBits, String outputPath) {
         try {
             int width = 256;
             int height = 256;
@@ -59,7 +54,7 @@ public class ImageProcessor extends Processor {
                     image.setRGB(x, y, rgb);
                 }
             }
-            ImageIO.write(image, "png", new File("img/img_decoded.png"));
+            ImageIO.write(image, "png", new File(outputPath));
         } catch (IOException e) {
             System.out.println("Error writing image: " + e.getMessage());
         }

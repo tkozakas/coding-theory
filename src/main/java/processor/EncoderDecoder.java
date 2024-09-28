@@ -6,7 +6,7 @@ import java.util.*;
 
 public class EncoderDecoder {
     private final static Random random = new Random();
-    private static boolean debug = true;
+    private static final boolean debug = true;
 
     /**
      * Encodes a message using the generator matrix G.

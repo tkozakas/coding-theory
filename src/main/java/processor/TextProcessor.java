@@ -1,10 +1,6 @@
 package processor;
 
 public class TextProcessor extends Processor {
-    public TextProcessor(EncoderDecoder encoderDecoder) {
-        super(encoderDecoder);
-    }
-
     public static int[] getBitRepresentation(String text) {
         StringBuilder bitStringBuilder = new StringBuilder();
         for (char c : text.toCharArray()) {
