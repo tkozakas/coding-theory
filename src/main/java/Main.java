@@ -20,7 +20,8 @@ public class Main extends Application {
     public static void main(String[] args) {
         if (args.length > 0 && args[0].equals("ui")) {
             launch(args);
+        } else {
+            new UserInterface().start();
         }
-        new UserInterface().start();
     }
 }

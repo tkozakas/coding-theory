@@ -3,6 +3,7 @@ package ui;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 
@@ -117,6 +118,10 @@ public class FxUserInterface {
 
     @FXML
     public void encodeInput() {
+        if (data.getG() == null) {
+            showAlert("Please generate the generating matrix first.");
+            return;
+        }
         data.encodeBlock();
         encodedBlockTextField.setText(Arrays.toString(data.getEncodedBlock()));
     }
@@ -166,6 +171,7 @@ public class FxUserInterface {
             return;
         }
         data.generateInputBits(inputTypeComboBox.getValue(), input);
+
         data.nextBlock();
         currentBlockTextField.setText(Arrays.toString(data.getBlock()));
     }
