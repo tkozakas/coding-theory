@@ -1,7 +1,6 @@
 package processor;
 
 import model.ExperimentResult;
-import ui.Data;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,6 +1,6 @@
 package ui;
 
-import processor.EncoderDecoder;
+import processor.Data;
 import processor.Experiment;
 
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class UserInterface {
                         "Input vector length: %d%n" +
                         "Input vector: %s%n%n",
                 data.getPe(), data.getQ(),
-                data.getG() != null ? "\n" + EncoderDecoder.printMatrix(data.getG()) : "Empty",
+                data.getG() != null ? "\n" + data.getEncoderDecoder().printMatrix(data.getG()) : "Empty",
                 data.getK(),
                 data.getBlock() != null ? Arrays.toString(data.getBlock()) : "Empty");
 

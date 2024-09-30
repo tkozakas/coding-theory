@@ -15,7 +15,7 @@ public class EncoderDecoder {
      * @param G generator matrix
      * @return encoded message
      */
-    public static int[] encode(int[] m, int[][] G) {
+    public int[] encode(int[] m, int[][] G) {
         StringBuilder message = Processor.getStringFromBits(m);
         System.out.println("\n=========================================\n");
         System.out.printf("Encoding message (m): %s (%s)%n", Arrays.toString(m), message);
@@ -37,7 +37,7 @@ public class EncoderDecoder {
      * @param G matrix
      * @return result of the multiplication
      */
-    private static int[] matrixVectorMultiply(int[] m, int[][] G) {
+    private int[] matrixVectorMultiply(int[] m, int[][] G) {
         int[] c = new int[G[0].length];
         for (int i = 0; i < G[0].length; i++) {
             for (int j = 0; j < m.length; j++) {
@@ -55,7 +55,7 @@ public class EncoderDecoder {
      * @param q number of symbols in the alphabet
      * @return codeword with errors
      */
-    public static int[] introduceErrors(int[] c, double pe, int q) {
+    public int[] introduceErrors(int[] c, double pe, int q) {
         int[] r = Arrays.copyOf(c, c.length);
 
         if (debug) {
@@ -97,7 +97,7 @@ public class EncoderDecoder {
      * @param n number of columns
      * @return generating matrix
      */
-    public static int[][] generateGeneratingMatrix(int k, int n) {
+    public int[][] generateGeneratingMatrix(int k, int n) {
         int[][] matrix = new int[k][n];
         for (int i = 0; i < k; i++) {
             for (int j = 0; j < k; j++) {
@@ -117,7 +117,7 @@ public class EncoderDecoder {
      * @param G generator matrix
      * @return parity-check matrix
      */
-    public static int[][] generateParityCheckMatrix(int[][] G) {
+    public int[][] generateParityCheckMatrix(int[][] G) {
         int k = G.length;
         int n = G[0].length;
 
@@ -157,7 +157,7 @@ public class EncoderDecoder {
      * @param r received vector
      * @return syndrome
      */
-    public static int[] computeSyndrome(int[][] H, int[] r) {
+    public int[] computeSyndrome(int[][] H, int[] r) {
         int[] s = new int[H.length];
         for (int i = 0; i < H.length; i++) {
             for (int j = 0; j < H[0].length; j++) {
@@ -173,9 +173,9 @@ public class EncoderDecoder {
      * @param H parity-check matrix
      * @return map of coset leaders
      */
-    public static Map<String, CosetLeader> findCosetLeaders(int[][] H) {
-        int n = H[0].length; // Number of columns in H
-        int m = H.length;    // Number of rows in H (syndrome length)
+    public Map<String, CosetLeader> findCosetLeaders(int[][] H) {
+        int n = H[0].length; // Length of the codeword
+        int m = H.length; // Number of syndromes
 
         Map<String, CosetLeader> cosetLeadersMap = new LinkedHashMap<>();
         initializeCosetLeaders(cosetLeadersMap, m, n);
@@ -202,7 +202,7 @@ public class EncoderDecoder {
         return cosetLeadersMap;
     }
 
-    private static void initializeCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int m, int n) {
+    private void initializeCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int m, int n) {
         int totalSyndromes = (int) Math.pow(2, m);
         for (int i = 0; i < totalSyndromes; i++) {
             int[] syndrome = new int[m];
@@ -223,7 +223,7 @@ public class EncoderDecoder {
      * @param weight          current weight of error patterns
      * @return count of updated syndromes
      */
-    private static int updateCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int[][] H, List<int[]> errorPatterns, int weight) {
+    private int updateCosetLeaders(Map<String, CosetLeader> cosetLeadersMap, int[][] H, List<int[]> errorPatterns, int weight) {
         int updatedCount = 0;
         for (int[] errorPattern : errorPatterns) {
             int[] syndrome = computeSyndrome(H, errorPattern);
@@ -248,7 +248,7 @@ public class EncoderDecoder {
      * @param w weight of the error pattern
      * @return list of error patterns
      */
-    private static List<int[]> generateErrorPatterns(int n, int w) {
+    private List<int[]> generateErrorPatterns(int n, int w) {
         List<int[]> patterns = new ArrayList<>();
         int[] pattern = new int[n];
         int totalPatterns = (int) Math.pow(2, n);
@@ -270,7 +270,7 @@ public class EncoderDecoder {
      * @param cosetLeadersMap map of coset leaders
      * @return decoded vector
      */
-    public static int[] decodeStepByStep(int[] r, int[][] H, Map<String, CosetLeader> cosetLeadersMap) {
+    public int[] decodeStepByStep(int[] r, int[][] H, Map<String, CosetLeader> cosetLeadersMap) {
         int n = r.length;
         int i = 0;
         int[] rCopy = Arrays.copyOf(r, n);
@@ -314,7 +314,7 @@ public class EncoderDecoder {
         }
     }
 
-    public static StringBuilder printMatrix(int[][] matrix) {
+    public StringBuilder printMatrix(int[][] matrix) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int[] row : matrix) {
             stringBuilder.append(Arrays.toString(row)).append("\n");

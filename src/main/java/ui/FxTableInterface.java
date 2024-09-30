@@ -8,11 +8,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.IntegerStringConverter;
 import model.CosetLeader;
+import processor.Data;
 
 import java.util.Arrays;
 
 public class FxTableInterface {
-
     private final Data data;
     public TextField columnsField;
     public TextField rowsField;

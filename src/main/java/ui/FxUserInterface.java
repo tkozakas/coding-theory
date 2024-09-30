@@ -3,9 +3,9 @@ package ui;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import processor.Data;
 
 import java.io.File;
 import java.util.Arrays;
@@ -32,6 +32,11 @@ public class FxUserInterface {
     public TextField fixedPositionTextField;
     public TextField noCodingFixedCountTextField;
     public TextField noCodingFixedPositionTextField;
+
+    private int totalFixed = 0;
+    private int totalErrors = 0;
+    private int totalNoCodingErrors = 0;
+    private int totalNoCodingFixed = 0;
 
     public FxUserInterface() {
         this.data = Data.getInstance();
@@ -135,6 +140,9 @@ public class FxUserInterface {
         errorPositionTextField.setText(Arrays.toString(data.getErrorPositions()));
         noCodingErrorCountTextField.setText(String.valueOf(data.getNoCodingErrorCount()));
         noCodingErrorPositionTextField.setText(Arrays.toString(data.getNoCodingErrorPositions()));
+
+        totalErrors += data.getErrorCount();
+        totalNoCodingErrors += data.getNoCodingErrorCount();
     }
 
     @FXML
@@ -155,6 +163,12 @@ public class FxUserInterface {
         fixedPositionTextField.setText(Arrays.toString(data.getFixedPositions()));
         noCodingFixedCountTextField.setText(String.valueOf(data.getNoCodingFixedCount()));
         noCodingFixedPositionTextField.setText(Arrays.toString(data.getNoCodingFixedPositions()));
+
+        totalFixed += data.getFixedCount();
+        totalNoCodingFixed += data.getNoCodingFixedCount();
+
+        System.out.printf("Total errors: %d, Total fixed: %d, Total no coding errors: %d, Total no coding fixed: %d\n",
+                totalErrors, totalFixed, totalNoCodingErrors, totalNoCodingFixed);
 
         if (data.getCurrentBitPosition() >= data.getInputBits().length) {
             showAlert("All blocks have been processed.");
@@ -192,6 +206,7 @@ public class FxUserInterface {
             sendEncodedBlock();
             decodeBlock();
         } while (data.getCurrentBitPosition() < data.getInputBits().length);
+
         data.setCurrentBitPosition(0);
     }
 

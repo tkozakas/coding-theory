@@ -1,13 +1,8 @@
-package ui;
+package processor;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import model.CosetLeader;
-import processor.EncoderDecoder;
-import processor.ImageProcessor;
-import processor.Processor;
-import processor.TextProcessor;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -26,6 +21,7 @@ public class Data {
     private int n;
     private int k;
     private int[] block;
+    private int[] blockWithoutCode;
     private int[] encodedBlock;
     private int[] blockWithError;
     private int[] blockWithoutCodeError;
@@ -33,8 +29,13 @@ public class Data {
     private int[] decodedBlock;
     private int[] inputBits;
     private int currentBitPosition = 0;
+
     private Map<String, CosetLeader> cosetLeaders = new HashMap<>();
     private boolean debugMode = false;
+
+    private Processor processor = new Processor();
+    private EncoderDecoder encoderDecoder = new EncoderDecoder();
+
 
     public static Data getInstance() {
         if (instance == null) {
@@ -44,25 +45,22 @@ public class Data {
     }
 
     public void generateGeneratingMatrix() {
-        G = EncoderDecoder.generateGeneratingMatrix(k, n);
+        G = encoderDecoder.generateGeneratingMatrix(k, n);
     }
 
     public void generateParityCheckMatrix() {
-        H = EncoderDecoder.generateParityCheckMatrix(G);
+        H = encoderDecoder.generateParityCheckMatrix(G);
     }
 
     public void generateCosetLeaders() {
-        cosetLeaders = EncoderDecoder.findCosetLeaders(H);
+        cosetLeaders = encoderDecoder.findCosetLeaders(H);
     }
 
     public void generateInputBits(String inputType, String input) {
         inputBits = switch (inputType) {
-            case "Vector" -> Arrays.stream(input.split(","))
-                    .map(String::trim)
-                    .mapToInt(Integer::parseInt)
-                    .toArray();
-            case "Text" -> TextProcessor.getBitRepresentation(input);
-            case "Image" -> ImageProcessor.getBitRepresentation(input);
+            case "Vector" -> processor.getBitRepresentationFromVector(input);
+            case "Text" -> processor.getBitRepresentationFromText(input);
+            case "Image" -> processor.getBitRepresentationFromImage(input);
             default -> new int[0];
         };
     }
@@ -77,16 +75,17 @@ public class Data {
     }
 
     public void encodeBlock() {
-        encodedBlock = EncoderDecoder.encode(block, G);
+        encodedBlock = encoderDecoder.encode(block, G);
+        blockWithoutCode = block;
     }
 
     public void introduceErrors() {
-        blockWithError = EncoderDecoder.introduceErrors(encodedBlock, pe, q);
-        blockWithoutCodeError = EncoderDecoder.introduceErrors(block, pe, q);
+        blockWithError = encoderDecoder.introduceErrors(encodedBlock, pe, q);
+        blockWithoutCodeError = encoderDecoder.introduceErrors(blockWithoutCode, pe, q);
     }
 
     public void decodeBlock() {
-        correctedBlock = EncoderDecoder.decodeStepByStep(blockWithError, H, cosetLeaders);
+        correctedBlock = encoderDecoder.decodeStepByStep(blockWithError, H, cosetLeaders);
         decodedBlock = Arrays.copyOf(correctedBlock, k);
         System.out.println("Decoded codeword: " + Arrays.toString(decodedBlock));
         decodedBlocks.add(decodedBlock);
@@ -102,11 +101,11 @@ public class Data {
     }
 
     public int[] getNoCodingErrorPositions() {
-        return getErrorPositions(blockWithoutCodeError, block);
+        return getErrorPositions(blockWithoutCodeError, blockWithoutCode);
     }
 
     public int getNoCodingErrorCount() {
-        return getErrorCount(blockWithoutCodeError, block);
+        return getErrorCount(blockWithoutCodeError, blockWithoutCode);
     }
 
     public StringBuilder getDecodedString() {
@@ -118,19 +117,19 @@ public class Data {
     }
 
     public int getFixedCount() {
-        return getFixedCount(decodedBlock, block);
+        return getFixedCount(decodedBlock, block, getErrorPositions());
     }
 
     public int[] getFixedPositions() {
-        return getFixedPositions(decodedBlock, block);
+        return getFixedPositions(decodedBlock, block, getErrorPositions());
     }
 
     public int getNoCodingFixedCount() {
-        return getFixedCount(blockWithoutCodeError, block);
+        return getFixedCount(blockWithoutCodeError, block, getNoCodingErrorPositions());
     }
 
     public int[] getNoCodingFixedPositions() {
-        return getFixedPositions(blockWithoutCodeError, block);
+        return getFixedPositions(blockWithoutCodeError, block, getNoCodingErrorPositions());
     }
 
     private int getErrorCount(int[] array1, int[] array2) {
@@ -145,15 +144,15 @@ public class Data {
                 .toArray();
     }
 
-    private int getFixedCount(int[] array1, int[] array2) {
+    private int getFixedCount(int[] array1, int[] array2, int[] errorPositions) {
         return (int) IntStream.range(0, array1.length)
-                .filter(i -> array1[i] == array2[i] && array1[i] != blockWithError[i])
+                .filter(i -> array1[i] == array2[i] && Arrays.stream(errorPositions).anyMatch(j -> j == i))
                 .count();
     }
 
-    private int[] getFixedPositions(int[] array1, int[] array2) {
+    private int[] getFixedPositions(int[] array1, int[] array2, int[] errorPositions) {
         return IntStream.range(0, array1.length)
-                .filter(i -> array1[i] == array2[i] && array1[i] != blockWithError[i])
+                .filter(i -> array1[i] == array2[i] && Arrays.stream(errorPositions).anyMatch(j -> j == i))
                 .toArray();
     }
 
@@ -164,10 +163,10 @@ public class Data {
     }
 
     public void writeImage() {
-        ImageProcessor.writeImage(decodedBlocks.stream()
+        processor.writeImage(decodedBlocks.stream()
                 .flatMapToInt(Arrays::stream)
                 .toArray(), "img/img_decoded.png");
-        ImageProcessor.writeImage(blocksWithoutCode.stream()
+        processor.writeImage(blocksWithoutCode.stream()
                 .flatMapToInt(Arrays::stream)
                 .toArray(), "img/img_without_code.png");
     }
