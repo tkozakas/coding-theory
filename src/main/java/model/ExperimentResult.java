@@ -13,6 +13,5 @@ public final class ExperimentResult {
     private int totalErrorsIntroduced;
     private int totalErrorsFixed;
     private double averageSuccessRate;
-    private double averageErrorsIntroduced;
-    private double averageErrorsFixed;
+    private double averageDecodingTime;
 }

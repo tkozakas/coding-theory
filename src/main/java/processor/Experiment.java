@@ -3,50 +3,54 @@ package processor;
 import model.ExperimentResult;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class Experiment {
-    private final int runs = 100;
     private final Data data = Data.getInstance();
 
     public void run() {
         System.out.println("Starting experiments...");
-        int[] inputSizes = {3, 5, 10, 15, 20, 30, 50};
-        int[][] matrixSizes = {{5, 3}, {10, 7}, {15, 10}, {20, 15}, {30, 20}};
-        int[] errorCounts = {1, 2, 3, 4, 5, 6};
+
+        int inputSize = 80;
+        double errorProbability = 0.0001;
+
+        List<int[]> matrixSizes = generateMatrixSizes();
 
         List<ExperimentResult> results = new ArrayList<>();
 
-        for (int size : inputSizes) {
-            System.out.printf("\n--- Input Size: %d ---\n", size);
-            for (int[] matrixSize : matrixSizes) {
-                int n = matrixSize[0];
-                int k = matrixSize[1];
-                if (n <= k) {
-                    continue;
-                }
-                System.out.printf("Matrix Size: (n = %d, k = %d)\n", n, k);
-
-                configureData(n, k);
-
-                for (int errorCount : errorCounts) {
-                    System.out.printf("Introducing %d deliberate errors.\n", errorCount);
-
-
-                    ExperimentResult result = runExperiment(size, errorCount, runs);
-
-                    results.add(result);
-
-                    System.out.printf("Avg Success Rate: %.2f%%, Avg Errors Introduced: %.2f, Avg Errors Fixed: %.2f\n",
-                            result.getAverageSuccessRate() * 100, result.getAverageErrorsIntroduced(),
-                            result.getAverageErrorsFixed());
-                }
+        for (int[] matrixSize : matrixSizes) {
+            int n = matrixSize[0];
+            int k = matrixSize[1];
+            if (n <= k) {
+                continue;
             }
+
+            System.out.printf("\n--- Matrix Size: n = %d, k = %d ---\n", n, k);
+
+            configureData(n, k);
+            int runs = 1;
+            ExperimentResult result = runExperiment(inputSize, runs, errorProbability);
+
+            results.add(result);
+
+            System.out.printf("Avg Success Rate: %.2f%%\n", result.getAverageSuccessRate() * 100);
+            System.out.printf("Avg Decoding Time: %.2f ms\n", result.getAverageDecodingTime());
         }
+
         printResultsTable(results);
         System.out.println("Experiments completed.");
+    }
+
+    private List<int[]> generateMatrixSizes() {
+        List<int[]> matrixSizes = new ArrayList<>();
+        // Generate (n, k) pairs where n ranges from k+1 to 80 and k ranges from 5 to 50
+        for (int k = 5; k <= 50; k += 10) {
+            for (int n = k + 1; n <= Math.min(k + 20, 80); n += 5) {
+                matrixSizes.add(new int[]{n, k});
+            }
+        }
+        return matrixSizes;
     }
 
     private void configureData(int n, int k) {
@@ -57,64 +61,47 @@ public class Experiment {
         data.generateCosetLeaders();
     }
 
-    private ExperimentResult runExperiment(int size, int errorCount, int runs) {
+    private ExperimentResult runExperiment(int inputSize, int runs, double errorProbability) {
         int totalErrorsIntroduced = 0;
         int totalErrorsFixed = 0;
         double totalSuccessRate = 0.0;
+        double totalDecodingTime = 0.0;
 
         for (int run = 0; run < runs; run++) {
-            data.setInputBits(generateRandomBits(size));
+            data.setInputBits(generateRandomBits(inputSize));
             data.setCurrentBitPosition(0);
-
+            long decodingTimeThisRun = 0;
             int errorsIntroducedThisRun = 0;
             int errorsFixedThisRun = 0;
-
             while (data.getCurrentBitPosition() < data.getInputBits().length) {
                 data.nextBlock();
                 data.encodeBlock();
-                int introducedErrors = introduceFixedErrors(errorCount);
-                errorsIntroducedThisRun += introducedErrors;
+
+                data.setPe(errorProbability);
+                data.introduceErrors();
+                errorsIntroducedThisRun += data.getErrorCount();
+
+                long startTime = System.nanoTime();
                 data.decodeBlock();
+                long endTime = System.nanoTime();
+
+                decodingTimeThisRun += (endTime - startTime) / 1_000_000;
                 errorsFixedThisRun += data.getFixedCount();
             }
 
             totalErrorsIntroduced += errorsIntroducedThisRun;
             totalErrorsFixed += errorsFixedThisRun;
 
-            double successRate = errorsIntroducedThisRun == 0 ? 1.0 : (double) errorsFixedThisRun / errorsIntroducedThisRun;
+            double successRate = errorsIntroducedThisRun == 0 ? 1.0
+                    : (double) errorsFixedThisRun / errorsIntroducedThisRun;
             totalSuccessRate += successRate;
+            totalDecodingTime += decodingTimeThisRun;
         }
-
         double averageSuccessRate = totalSuccessRate / runs;
-        double averageErrorsIntroduced = (double) totalErrorsIntroduced / runs;
-        double averageErrorsFixed = (double) totalErrorsFixed / runs;
+        double averageDecodingTime = totalDecodingTime / runs;
 
-        return new ExperimentResult(size, data.getN(), data.getK(), 0, totalErrorsIntroduced,
-                totalErrorsFixed, averageSuccessRate, averageErrorsIntroduced, averageErrorsFixed);
-    }
-
-    private int introduceFixedErrors(int errorCount) {
-        int[] encodedBlock = data.getEncodedBlock();
-        int blockLength = encodedBlock.length;
-
-        if (errorCount > blockLength) {
-            errorCount = blockLength;
-            System.out.printf("Error count adjusted to %d to fit block length.\n", blockLength);
-        }
-
-        List<Integer> indices = new ArrayList<>();
-        for (int i = 0; i < blockLength; i++) {
-            indices.add(i);
-        }
-        Collections.shuffle(indices);
-
-        for (int i = 0; i < errorCount; i++) {
-            int pos = indices.get(i);
-            encodedBlock[pos] ^= 1;
-        }
-
-        data.setBlockWithError(encodedBlock);
-        return errorCount;
+        return new ExperimentResult(inputSize, data.getN(), data.getK(), 0, totalErrorsIntroduced,
+                totalErrorsFixed, averageSuccessRate, averageDecodingTime);
     }
 
     private int[] generateRandomBits(int size) {
@@ -124,15 +111,17 @@ public class Experiment {
 
     private void printResultsTable(List<ExperimentResult> results) {
         System.out.println("\nResults Summary:");
-        System.out.printf("%-12s %-8s %-8s %-20s %-20s %-15s %-20s %-20s%n",
+        System.out.printf("%-12s %-8s %-8s %-20s %-20s %-18s %-18s%n",
                 "Input Size", "n", "k", "Errors Introduced",
-                "Errors Fixed", "Avg Success Rate (%)", "Avg Errors Introduced", "Avg Errors Fixed");
+                "Errors Fixed", "Success Rate (%)", "Avg Decoding Time (ms)");
+
         for (ExperimentResult result : results) {
-            System.out.printf("%-12d %-8d %-8d %-20d %-20d %-15.2f %-20.2f %-20.2f%n",
-                    result.getSize(), result.getN(), result.getK(),
-                    result.getTotalErrorsIntroduced(), result.getTotalErrorsFixed(),
-                    result.getAverageSuccessRate() * 100, result.getAverageErrorsIntroduced(),
-                    result.getAverageErrorsFixed());
+            if (result != null) {
+                System.out.printf("%-12d %-8d %-8d %-20d %-20d %-18.2f %-18.5f%n",
+                        result.getSize(), result.getN(), result.getK(),
+                        result.getTotalErrorsIntroduced(), result.getTotalErrorsFixed(),
+                        result.getAverageSuccessRate() * 100, result.getAverageDecodingTime());
+            }
         }
     }
 }
