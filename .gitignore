@@ -33,5 +33,3 @@ replay_pid*
 .idea
 *.iml
 out
-javafx-sdk-21/lib/libjfxwebkit.so
-lib.javafx-sfk-17/lib/libjfxwebkit.so
