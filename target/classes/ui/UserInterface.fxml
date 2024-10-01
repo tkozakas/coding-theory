@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+<VBox xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ui.FxUserInterface">
+    <GridPane hgap="10" prefHeight="78.0" prefWidth="534.0" vgap="10">
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="10" />
+        </padding>
+        <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+        </columnConstraints>
+
+        <Label style="-fx-font-weight: bold;" text="Error Probability:" />
+        <HBox spacing="10" GridPane.columnIndex="1">
+            <TextField fx:id="errorProbabilityTextField" prefHeight="26.0" prefWidth="235.0" promptText="Enter probability" />
+        </HBox>
+
+        <Label style="-fx-font-weight: bold;" text="Alphabet Size:" GridPane.rowIndex="1" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <TextField fx:id="alphabetSizeTextField" prefHeight="26.0" prefWidth="236.0" promptText="Enter alphabet size" />
+        </HBox>
+        <rowConstraints>
+            <RowConstraints maxHeight="26.0" minHeight="26.0" prefHeight="26.0" />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
+    </GridPane>
+
+    <GridPane hgap="10" prefHeight="573.0" prefWidth="369.0" vgap="10">
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="10" />
+        </padding>
+        <columnConstraints>
+            <ColumnConstraints maxWidth="121.0" minWidth="110.0" prefWidth="119.0" />
+            <ColumnConstraints maxWidth="310.0" minWidth="307.0" prefWidth="307.0" />
+            <ColumnConstraints maxWidth="88.0" minWidth="68.0" prefWidth="68.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" />
+         <RowConstraints minHeight="10.0" prefHeight="30.0" />
+         <RowConstraints minHeight="10.0" prefHeight="30.0" />
+        </rowConstraints>
+
+        <!-- Input Type and Fields -->
+        <Label style="-fx-font-weight: bold;" text="Input Type:" />
+        <ComboBox fx:id="inputTypeComboBox" onAction="#handleInputTypeSelection" prefHeight="26.0" prefWidth="291.0" GridPane.columnIndex="1">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Vector" />
+                    <String fx:value="Text" />
+                    <String fx:value="Image" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+
+        <Label style="-fx-font-weight: bold;" text="Input (m):" GridPane.rowIndex="1"/>
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <TextField fx:id="inputTextField" prefHeight="26.0" prefWidth="300.0" promptText="Vector (e.g., 1, 0, 1)" />
+        </HBox>
+        <Button onAction="#setNextBlock" prefWidth="120" text="Next Block" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+
+        <Label style="-fx-font-weight: bold;" text="Current Block (m):" GridPane.rowIndex="2" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <TextField fx:id="currentBlockTextField" prefHeight="26.0" prefWidth="300.0" promptText="Current Block (m)" />
+        </HBox>
+        <Button onAction="#encodeInput" prefWidth="120" text="Encode" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+        <Label style="-fx-font-weight: bold;" text="Encoded (c):" GridPane.rowIndex="3" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <TextField fx:id="encodedBlockTextField" prefHeight="26.0" prefWidth="300.0" promptText="Encoded Block" />
+        </HBox>
+        <Button onAction="#sendEncodedBlock" prefWidth="120" text="Send" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+
+        <Label style="-fx-font-weight: bold;" text="Channel (r):" GridPane.rowIndex="5" />
+        <SplitPane prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <HBox prefHeight="100.0" prefWidth="200.0">
+                <TextField fx:id="withErrorTextField" promptText="With Error" />
+                <TextField fx:id="withoutCodeErrorTextField" promptText="With Error No Code" />
+            </HBox>
+        </SplitPane>
+        <Button onAction="#decodeBlock" prefWidth="120.0" text="Decode" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+
+        <Label style="-fx-font-weight: bold;" text="Corrected:" GridPane.rowIndex="8" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="8">
+            <TextField fx:id="correctedBlockTextField" prefHeight="26.0" prefWidth="300.0" promptText="Corrected Block" />
+        </HBox>
+
+        <Label style="-fx-font-weight: bold;" text="Decoded:" GridPane.rowIndex="9" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="9">
+            <TextField fx:id="decodedBlockTextField" prefHeight="26.0" prefWidth="300.0" promptText="Decoded Block" />
+        </HBox>
+
+        <Label style="-fx-font-weight: bold;" text="Decoding Comparison:" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="10">
+            <Label style="-fx-font-weight: bold;" text="Decoded / Without Coding" />
+        </HBox>
+
+        <Label style="-fx-font-weight: bold;" text="Text Output:" GridPane.rowIndex="11" />
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="11">
+            <TextField fx:id="decodedTextField" promptText="Decoded Text" />
+            <TextField fx:id="withoutCodingTextField" promptText="Text Without Coding" />
+        </HBox>
+
+        <SplitPane dividerPositions="0.5" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="6">
+            <VBox prefHeight="200.0" prefWidth="100.0">
+                <TextField fx:id="errorCountTextField" promptText="Error Count" />
+                <TextField fx:id="errorPositionTextField" promptText="Error Position" />
+            </VBox>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+                <TextField fx:id="noCodingErrorCountTextField" promptText="Error Count" />
+                <TextField fx:id="noCodingErrorPositionTextField" promptText="Error Position" />
+            </VBox>
+        </SplitPane>
+        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="6">
+            <Label style="-fx-font-weight: bold;" text="Error Count:" />
+            <Label style="-fx-font-weight: bold;" text="Error Positions:">
+                <padding>
+                    <Insets top="10.0" />
+                </padding>
+            </Label>
+        </VBox>
+        <Label style="-fx-font-weight: bold;" text="Decoding / Without Coding" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+      <Button onAction="#processInput" prefWidth="120" text="Process" GridPane.columnIndex="2" />
+      <Button onAction="#clearInput" prefWidth="120.0" text="Clear" GridPane.columnIndex="2" GridPane.rowIndex="13" />
+        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="12">
+            <Label style="-fx-font-weight: bold;" text="Fixed:" />
+            <Label style="-fx-font-weight: bold;" text="Fixed Positions:">
+                <padding>
+                    <Insets top="10.0" />
+                </padding>
+            </Label>
+        </VBox>
+        <SplitPane dividerPositions="0.5" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="12">
+            <VBox prefHeight="200.0" prefWidth="100.0">
+                <TextField fx:id="fixedCountTextFiled" promptText="Fixed Count" />
+                <TextField fx:id="fixedPositionTextField" promptText="Fixed Positions" />
+            </VBox>
+            <VBox prefHeight="200.0" prefWidth="100.0">
+                <TextField fx:id="noCodingFixedCountTextField" promptText="Fixed Count" />
+                <TextField fx:id="noCodingFixedPositionTextField" promptText="Fixed Positions" />
+            </VBox>
+        </SplitPane>
+    </GridPane>
+</VBox>
