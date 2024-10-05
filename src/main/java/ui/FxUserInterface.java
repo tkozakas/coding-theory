@@ -32,11 +32,8 @@ public class FxUserInterface {
     public TextField fixedPositionTextField;
     public TextField noCodingFixedCountTextField;
     public TextField noCodingFixedPositionTextField;
-
-    private int totalFixed = 0;
-    private int totalErrors = 0;
-    private int totalNoCodingErrors = 0;
-    private int totalNoCodingFixed = 0;
+    public TextField blocksDecodedTextField;
+    public TextField withoutCodingBlocksDecodedTextField;
 
     public FxUserInterface() {
         this.data = Data.getInstance();
@@ -140,9 +137,6 @@ public class FxUserInterface {
         errorPositionTextField.setText(Arrays.toString(data.getErrorPositions()));
         noCodingErrorCountTextField.setText(String.valueOf(data.getNoCodingErrorCount()));
         noCodingErrorPositionTextField.setText(Arrays.toString(data.getNoCodingErrorPositions()));
-
-        totalErrors += data.getErrorCount();
-        totalNoCodingErrors += data.getNoCodingErrorCount();
     }
 
     @FXML
@@ -163,12 +157,12 @@ public class FxUserInterface {
         fixedPositionTextField.setText(Arrays.toString(data.getFixedPositions()));
         noCodingFixedCountTextField.setText(String.valueOf(data.getNoCodingFixedCount()));
         noCodingFixedPositionTextField.setText(Arrays.toString(data.getNoCodingFixedPositions()));
-
-        totalFixed += data.getFixedCount();
-        totalNoCodingFixed += data.getNoCodingFixedCount();
-
-        System.out.printf("Total errors: %d, Total fixed: %d, Total no coding errors: %d, Total no coding fixed: %d\n",
-                totalErrors, totalFixed, totalNoCodingErrors, totalNoCodingFixed);
+        blocksDecodedTextField.setText(Arrays.toString(data.getDecodedBlocks().stream()
+                .flatMapToInt(Arrays::stream)
+                .toArray()));
+        withoutCodingBlocksDecodedTextField.setText(Arrays.toString(data.getBlocksWithoutCode().stream()
+                .flatMapToInt(Arrays::stream)
+                .toArray()));
 
         if (data.getCurrentBitPosition() >= data.getInputBits().length) {
             showAlert("All blocks have been processed.");
@@ -227,6 +221,8 @@ public class FxUserInterface {
         fixedPositionTextField.clear();
         noCodingFixedCountTextField.clear();
         noCodingFixedPositionTextField.clear();
+        blocksDecodedTextField.clear();
+        withoutCodingBlocksDecodedTextField.clear();
         data.getDecodedBlocks().clear();
         data.getBlocksWithoutCode().clear();
         data.setCurrentBitPosition(0);

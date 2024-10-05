@@ -6,7 +6,7 @@ import java.util.*;
 
 public class EncoderDecoder {
     private final static Random random = new Random();
-    private static final boolean debug = true;
+    private static final boolean debug = false;
 
     /**
      * Encodes a message using the generator matrix G.
@@ -16,17 +16,14 @@ public class EncoderDecoder {
      * @return encoded message
      */
     public int[] encode(int[] m, int[][] G) {
-        StringBuilder message = Processor.getStringFromBits(m);
-        System.out.println("\n=========================================\n");
-        System.out.printf("Encoding message (m): %s (%s)%n", Arrays.toString(m), message);
-
         int[] c = matrixVectorMultiply(m, G);
         if (debug) {
+            StringBuilder message = Processor.getStringFromBits(m);
+            System.out.println("\n=========================================\n");
+            System.out.printf("Encoding message (m): %s (%s)%n", Arrays.toString(m), message);
             System.out.println("\nGenerating matrix (G):");
             printMatrix(G);
-            System.out.println("\nCodeword (c): " + Arrays.toString(c));
-        } else {
-            System.out.println("Encoded message (c): " + Arrays.toString(c));
+            System.out.println("\nEncoded message (c): " + Arrays.toString(c));
         }
         return c;
     }
@@ -86,7 +83,9 @@ public class EncoderDecoder {
             }
         }
 
-        System.out.println("Transmitted vector with errors (r): " + Arrays.toString(r));
+        if (debug) {
+            System.out.println("Transmitted vector with errors (r): " + Arrays.toString(r));
+        }
         return r;
     }
 

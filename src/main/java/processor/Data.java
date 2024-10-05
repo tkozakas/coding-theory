@@ -30,12 +30,19 @@ public class Data {
     private int[] inputBits;
     private int currentBitPosition = 0;
 
+    private int totalFixed = 0;
+    private int totalErrors = 0;
+    private int totalNoCodingErrors = 0;
+    private int totalNoCodingFixed = 0;
+
+    private int currentBlock = 0;
+    private int totalBlocks = 0;
+
     private Map<String, CosetLeader> cosetLeaders = new HashMap<>();
     private boolean debugMode = false;
 
     private Processor processor = new Processor();
     private EncoderDecoder encoderDecoder = new EncoderDecoder();
-
 
     public static Data getInstance() {
         if (instance == null) {
@@ -66,9 +73,11 @@ public class Data {
     }
 
     public void nextBlock() {
-        int end = Math.min(currentBitPosition + k, inputBits.length);
-        block = Arrays.copyOfRange(inputBits, currentBitPosition, end);
-        currentBitPosition = end;
+        block = Arrays.copyOfRange(inputBits, currentBitPosition, Math.min(currentBitPosition + k, inputBits.length));
+        currentBitPosition += k;
+        currentBlock++;
+        totalBlocks = (int) Math.ceil((double) inputBits.length / k);
+        System.out.printf("Block %d/%d: %s\n", currentBlock, totalBlocks, Arrays.toString(block));
         if (block.length < k) {
             block = Arrays.copyOf(block, k);
         }
@@ -82,12 +91,27 @@ public class Data {
     public void introduceErrors() {
         blockWithError = encoderDecoder.introduceErrors(encodedBlock, pe, q);
         blockWithoutCodeError = encoderDecoder.introduceErrors(blockWithoutCode, pe, q);
+        totalErrors += getErrorCount();
+        totalNoCodingErrors += getNoCodingErrorCount();
     }
 
     public void decodeBlock() {
         correctedBlock = encoderDecoder.decodeStepByStep(blockWithError, H, cosetLeaders);
         decodedBlock = Arrays.copyOf(correctedBlock, k);
-        System.out.println("Decoded codeword: " + Arrays.toString(decodedBlock));
+        blockWithoutCode = Arrays.copyOf(blockWithoutCode, k);
+        if (Data.getInstance().isDebugMode()) {
+            System.out.println("\nBlock: " + Arrays.toString(block));
+            System.out.println("Encoded block: " + Arrays.toString(encodedBlock));
+            System.out.println("Block with error: " + Arrays.toString(blockWithError));
+            System.out.println("Corrected block: " + Arrays.toString(correctedBlock));
+            System.out.println("Decoded block: " + Arrays.toString(decodedBlock));
+            System.out.println("Block without code: " + Arrays.toString(blockWithoutCode));
+            System.out.println("Block without code error: " + Arrays.toString(blockWithoutCodeError));
+            totalFixed += getFixedCount();
+            totalNoCodingFixed += getNoCodingFixedCount();
+            System.out.printf("Total errors: %d, Total fixed: %d, Total no coding errors: %d, Total no coding fixed: %d\n\n",
+                    totalErrors, totalFixed, totalNoCodingErrors, totalNoCodingFixed);
+        }
         decodedBlocks.add(decodedBlock);
         blocksWithoutCode.add(blockWithoutCodeError);
     }
