@@ -4,9 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class Processor {
     private BufferedImage inputImage;
@@ -40,6 +38,41 @@ public class Processor {
         }
     }
 
+    public void writeImage(int[] bitStream, String outputPath) {
+        try {
+            int width = inputImage.getWidth();
+            int height = inputImage.getHeight();
+            BufferedImage image = getImage(bitStream, width, height);
+
+            ImageIO.write(image, "png", new File(outputPath));
+            System.out.println("Image written successfully to " + outputPath);
+
+        } catch (IOException e) {
+            System.out.println("Error writing image: " + e.getMessage());
+        }
+    }
+
+    private static BufferedImage getImage(int[] bitStream, int width, int height) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        int bitIndex = 0;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int red = 0, green = 0, blue = 0;
+
+                for (int i = 0; i < 8; i++) {
+                    red = (red << 1) | bitStream[bitIndex++];
+                    green = (green << 1) | bitStream[bitIndex++];
+                    blue = (blue << 1) | bitStream[bitIndex++];
+                }
+
+                int rgb = (red << 16) | (green << 8) | blue;
+                image.setRGB(x, y, rgb);
+            }
+        }
+        return image;
+    }
+
     public int[] getBitRepresentationFromVector(String input) {
         return Arrays.stream(input.split(",")).map(String::trim).mapToInt(Integer::parseInt).toArray();
     }
@@ -62,53 +95,5 @@ public class Processor {
             decodedText.append((char) Integer.parseInt(byteStr, 2));
         }
         return decodedText;
-    }
-
-    public void writeImage(int[] decodedEncodedBits, String outputPath) {
-        try {
-            if (inputImage == null) {
-                System.out.println("No input image is loaded.");
-                return;
-            }
-
-            int width = inputImage.getWidth();
-            int height = inputImage.getHeight();
-            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            List<Integer> rgbList = getRgbList(decodedEncodedBits);
-
-            int pixelIndex = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    int red = rgbList.get(pixelIndex++);
-                    int green = rgbList.get(pixelIndex++);
-                    int blue = rgbList.get(pixelIndex++);
-                    image.setRGB(x, y, (red << 16) | (green << 8) | blue);
-                }
-            }
-
-            ImageIO.write(image, "png", new File(outputPath));
-            System.out.println("Image written successfully to " + outputPath);
-
-        } catch (IOException e) {
-            System.out.println("Error writing image: " + e.getMessage());
-        }
-    }
-
-    private List<Integer> getRgbList(int[] decodedEncodedBits) {
-        List<Integer> rgbList = new ArrayList<>();
-        for (int i = 0; i + 24 <= decodedEncodedBits.length; i += 24) {
-            int red = 0, green = 0, blue = 0;
-
-            for (int j = 0; j < 8; j++) {
-                red = (red << 1) | decodedEncodedBits[i + j];
-                green = (green << 1) | decodedEncodedBits[i + 8 + j];
-                blue = (blue << 1) | decodedEncodedBits[i + 16 + j];
-            }
-
-            rgbList.add(Math.min(255, Math.max(0, red)));
-            rgbList.add(Math.min(255, Math.max(0, green)));
-            rgbList.add(Math.min(255, Math.max(0, blue)));
-        }
-        return rgbList;
     }
 }

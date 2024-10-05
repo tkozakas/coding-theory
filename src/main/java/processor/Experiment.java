@@ -1,7 +1,5 @@
 package processor;
 
-import model.ExperimentResult;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -9,119 +7,206 @@ import java.util.Random;
 public class Experiment {
     private final Data data = Data.getInstance();
 
+    private static class ExperimentResult {
+        int k, n;
+        double pe;
+        List<Object[]> resultsTable;
+
+        public ExperimentResult(int k, int n, double pe, List<Object[]> resultsTable) {
+            this.k = k;
+            this.n = n;
+            this.pe = pe;
+            this.resultsTable = resultsTable;
+        }
+    }
+
     public void run() {
-        System.out.println("Starting experiments...");
-
-        int inputSize = 80;
-        double errorProbability = 0.0001;
-
-        List<int[]> matrixSizes = generateMatrixSizes();
-
-        List<ExperimentResult> results = new ArrayList<>();
-
-        for (int[] matrixSize : matrixSizes) {
-            int n = matrixSize[0];
-            int k = matrixSize[1];
-            if (n <= k) {
-                continue;
-            }
-
-            System.out.printf("\n--- Matrix Size: n = %d, k = %d ---\n", n, k);
-
-            configureData(n, k);
-            int runs = 1;
-            ExperimentResult result = runExperiment(inputSize, runs, errorProbability);
-
-            results.add(result);
-
-            System.out.printf("Avg Success Rate: %.2f%%\n", result.getAverageSuccessRate() * 100);
-            System.out.printf("Avg Decoding Time: %.2f ms\n", result.getAverageDecodingTime());
-        }
-
-        printResultsTable(results);
-        System.out.println("Experiments completed.");
+        runPerformanceExperiment();
+        runMatrixGenerationExperiment();
     }
 
-    private List<int[]> generateMatrixSizes() {
-        List<int[]> matrixSizes = new ArrayList<>();
-        // Generate (n, k) pairs where n ranges from k+1 to 80 and k ranges from 5 to 50
-        for (int k = 5; k <= 50; k += 10) {
-            for (int n = k + 1; n <= Math.min(k + 20, 80); n += 5) {
-                matrixSizes.add(new int[]{n, k});
-            }
-        }
-        return matrixSizes;
-    }
-
-    private void configureData(int n, int k) {
-        data.setN(n);
-        data.setK(k);
-        data.generateGeneratingMatrix();
-        data.generateParityCheckMatrix();
-        data.generateCosetLeaders();
-    }
-
-    private ExperimentResult runExperiment(int inputSize, int runs, double errorProbability) {
-        int totalErrorsIntroduced = 0;
-        int totalErrorsFixed = 0;
-        double totalSuccessRate = 0.0;
-        double totalDecodingTime = 0.0;
-
-        for (int run = 0; run < runs; run++) {
-            data.setInputBits(generateRandomBits(inputSize));
-            data.setCurrentBitPosition(0);
-            long decodingTimeThisRun = 0;
-            int errorsIntroducedThisRun = 0;
-            int errorsFixedThisRun = 0;
-            while (data.getCurrentBitPosition() < data.getInputBits().length) {
-                data.nextBlock();
-                data.encodeBlock();
-
-                data.setPe(errorProbability);
-                data.introduceErrors();
-                errorsIntroducedThisRun += data.getErrorCount();
-
-                long startTime = System.nanoTime();
-                data.decodeBlock();
-                long endTime = System.nanoTime();
-
-                decodingTimeThisRun += (endTime - startTime) / 1_000_000;
-                errorsFixedThisRun += data.getFixedCount();
-            }
-
-            totalErrorsIntroduced += errorsIntroducedThisRun;
-            totalErrorsFixed += errorsFixedThisRun;
-
-            double successRate = errorsIntroducedThisRun == 0 ? 1.0
-                    : (double) errorsFixedThisRun / errorsIntroducedThisRun;
-            totalSuccessRate += successRate;
-            totalDecodingTime += decodingTimeThisRun;
-        }
-        double averageSuccessRate = totalSuccessRate / runs;
-        double averageDecodingTime = totalDecodingTime / runs;
-
-        return new ExperimentResult(inputSize, data.getN(), data.getK(), 0, totalErrorsIntroduced,
-                totalErrorsFixed, averageSuccessRate, averageDecodingTime);
-    }
-
-    private int[] generateRandomBits(int size) {
+    public void runPerformanceExperiment() {
+        int[] ks = {8};
+        int totalIterations = 100;
+        int totalInputSize = 500;
+        double[] probabilities = {0.0001, 0.001, 0.01};
         Random random = new Random();
-        return random.ints(size, 0, 2).toArray();
-    }
+        List<ExperimentResult> allResults = new ArrayList<>();
 
-    private void printResultsTable(List<ExperimentResult> results) {
-        System.out.println("\nResults Summary:");
-        System.out.printf("%-12s %-8s %-8s %-20s %-20s %-18s %-18s%n",
-                "Input Size", "n", "k", "Errors Introduced",
-                "Errors Fixed", "Success Rate (%)", "Avg Decoding Time (ms)");
+        for (double pe : probabilities) {
+            data.setPe(pe);
 
-        for (ExperimentResult result : results) {
-            if (result != null) {
-                System.out.printf("%-12d %-8d %-8d %-20d %-20d %-18.2f %-18.5f%n",
-                        result.getSize(), result.getN(), result.getK(),
-                        result.getTotalErrorsIntroduced(), result.getTotalErrorsFixed(),
-                        result.getAverageSuccessRate() * 100, result.getAverageDecodingTime());
+            for (int k : ks) {
+                int n = k + 1;
+                List<Object[]> resultsTable = new ArrayList<>();
+
+                for (int inputSize = 2; inputSize <= totalInputSize; inputSize *= 2) {
+                    long totalDecodingTime = 0;
+                    long totalEncodingTime = 0;
+                    long totalErrorIntroductionTime = 0;
+
+                    for (int iteration = 0; iteration < totalIterations; iteration++) {
+                        data.setK(k);
+                        data.setN(n);
+
+                        StringBuilder inputBits = new StringBuilder();
+                        for (int i = 0; i < inputSize; i++) {
+                            inputBits.append(random.nextInt(2) == 0 ? 0 : 1);
+                            if (i < inputSize - 1) {
+                                inputBits.append(", ");
+                            }
+                        }
+                        data.generateInputBits("Vector", inputBits.toString());
+                        data.generateGeneratingMatrix();
+                        data.generateParityCheckMatrix();
+                        data.generateCosetLeaders();
+
+                        long decodingStartTime = System.nanoTime();
+
+                        while (data.getCurrentBitPosition() < data.getInputBits().length) {
+                            data.nextBlock();
+
+                            long encodingStartTime = System.nanoTime();
+                            data.encodeBlock();
+                            long encodingEndTime = System.nanoTime();
+                            totalEncodingTime += (encodingEndTime - encodingStartTime);
+
+                            long errorIntroStartTime = System.nanoTime();
+                            data.introduceErrors();
+                            long errorIntroEndTime = System.nanoTime();
+                            totalErrorIntroductionTime += (errorIntroEndTime - errorIntroStartTime);
+
+                            data.decodeBlock();
+                        }
+
+                        long decodingEndTime = System.nanoTime();
+                        totalDecodingTime += (decodingEndTime - decodingStartTime);
+
+                        data.clear();
+                    }
+
+                    long averageDecodingTime = totalDecodingTime / totalIterations;
+                    long averageEncodingTime = totalEncodingTime / totalIterations;
+                    long averageErrorIntroductionTime = totalErrorIntroductionTime / totalIterations;
+
+                    resultsTable.add(new Object[]{
+                            inputSize, averageEncodingTime, averageDecodingTime, averageErrorIntroductionTime
+                    });
+                }
+
+                allResults.add(new ExperimentResult(k, n, pe, resultsTable));
             }
         }
+
+        printPerformanceResults(allResults);
+    }
+
+    public void runMatrixGenerationExperiment() {
+        int[] ks = {4, 8, 16};
+        List<ExperimentResult> allResults = new ArrayList<>();
+
+        for (int k : ks) {
+            List<Object[]> resultsTable = new ArrayList<>();
+
+            for (int n = k + 1; n <= k + 10; n++) {
+                long totalGenMatrixTime = 0;
+                long totalParityCheckTime = 0;
+                long totalCosetLeaderTime = 0;
+                int totalIterations = 10;
+
+                int cosetLeaderCount = (int) Math.pow(2, n - k);
+
+                for (int iteration = 0; iteration < totalIterations; iteration++) {
+                    data.setK(k);
+                    data.setN(n);
+
+                    long genMatrixStartTime = System.nanoTime();
+                    data.generateGeneratingMatrix();
+                    long genMatrixEndTime = System.nanoTime();
+                    totalGenMatrixTime += (genMatrixEndTime - genMatrixStartTime);
+
+                    long parityCheckStartTime = System.nanoTime();
+                    data.generateParityCheckMatrix();
+                    long parityCheckEndTime = System.nanoTime();
+                    totalParityCheckTime += (parityCheckEndTime - parityCheckStartTime);
+
+                    long cosetLeaderStartTime = System.nanoTime();
+                    data.generateCosetLeaders();
+                    long cosetLeaderEndTime = System.nanoTime();
+                    totalCosetLeaderTime += (cosetLeaderEndTime - cosetLeaderStartTime);
+                }
+
+                long averageGenMatrixTime = totalGenMatrixTime / totalIterations;
+                long averageParityCheckTime = totalParityCheckTime / totalIterations;
+                long averageCosetLeaderTime = totalCosetLeaderTime / totalIterations;
+
+                resultsTable.add(new Object[]{
+                        k, n, averageGenMatrixTime, averageParityCheckTime, averageCosetLeaderTime, cosetLeaderCount
+                });
+            }
+
+            allResults.add(new ExperimentResult(k, 0, 0.0, resultsTable));
+        }
+
+        printMatrixGenerationResults(allResults);
+    }
+
+
+    private void printPerformanceResults(List<ExperimentResult> allResults) {
+        for (ExperimentResult result : allResults) {
+            System.out.println("\nPerformance Results for k = " + result.k + ", n = " + result.n + ", pe = " + result.pe);
+            printPerformanceTable(result.resultsTable);
+        }
+    }
+
+    private void printMatrixGenerationResults(List<ExperimentResult> allResults) {
+        for (ExperimentResult result : allResults) {
+            System.out.println("\nMatrix Generation Results for k = " + result.k);
+            printMatrixGenerationTable(result.resultsTable);
+        }
+    }
+
+    private void printPerformanceTable(List<Object[]> resultsTable) {
+        System.out.println("\nPerformance Results Table:");
+        System.out.println("-.".repeat(75));
+        System.out.printf("%-12s | %-20s | %-20s | %-25s\n",
+                "Input Size", "Avg Encoding Time (ns)", "Avg Decoding Time (ns)", "Avg Error Introduction Time (ns)");
+        System.out.println("-.".repeat(75));
+
+        for (Object[] result : resultsTable) {
+            System.out.printf("%-12d | %-20d | %-20d | %-25d\n",
+                    (int) result[0],
+                    (long) result[1],
+                    (long) result[2],
+                    (long) result[3]);
+        }
+
+        System.out.println("-.".repeat(75));
+    }
+
+    private void printMatrixGenerationTable(List<Object[]> resultsTable) {
+        System.out.println("\nMatrix Generation Results Table:");
+        System.out.println("-.".repeat(75));
+        System.out.printf("%-12s | %-12s | %-25s | %-25s | %-25s | %-20s\n",
+                "k", "n", "Avg Gen Matrix Time (ns)", "Avg Parity Check Time (ns)", "Avg Coset Leader Time (ns)", "Coset Leaders");
+        System.out.println("-.".repeat(75));
+
+        for (Object[] result : resultsTable) {
+            System.out.printf("%-12d | %-12d | %-25d | %-25d | %-25d | %-20d\n",
+                    (int) result[0],
+                    (int) result[1],
+                    (long) result[2],
+                    (long) result[3],
+                    (long) result[4],
+                    (int) result[5]);
+        }
+
+        System.out.println("-.".repeat(75));
+    }
+
+
+    public static void main(String[] args) {
+        Experiment experiment = new Experiment();
+        experiment.run();
     }
 }

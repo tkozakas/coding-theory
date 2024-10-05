@@ -205,26 +205,19 @@ public class FxUserInterface {
     }
 
     public void clearInput() {
-        currentBlockTextField.clear();
-        encodedBlockTextField.clear();
-        withErrorTextField.clear();
-        correctedBlockTextField.clear();
-        decodedBlockTextField.clear();
-        withoutCodeErrorTextField.clear();
-        decodedTextField.clear();
-        withoutCodingTextField.clear();
-        errorCountTextField.clear();
-        errorPositionTextField.clear();
-        noCodingErrorCountTextField.clear();
-        noCodingErrorPositionTextField.clear();
-        fixedCountTextFiled.clear();
-        fixedPositionTextField.clear();
-        noCodingFixedCountTextField.clear();
-        noCodingFixedPositionTextField.clear();
-        blocksDecodedTextField.clear();
-        withoutCodingBlocksDecodedTextField.clear();
-        data.getDecodedBlocks().clear();
-        data.getBlocksWithoutCode().clear();
-        data.setCurrentBitPosition(0);
+        clear(
+                currentBlockTextField, encodedBlockTextField, withErrorTextField, correctedBlockTextField, decodedBlockTextField,
+                withoutCodeErrorTextField, decodedTextField, withoutCodingTextField, errorCountTextField,
+                errorPositionTextField, noCodingErrorCountTextField, noCodingErrorPositionTextField,
+                fixedCountTextFiled, fixedPositionTextField, noCodingFixedCountTextField,
+                noCodingFixedPositionTextField, blocksDecodedTextField, withoutCodingBlocksDecodedTextField
+        );
+        data.clear();
+    }
+
+    private void clear(TextField... textFields) {
+        for (TextField textField : textFields) {
+            textField.clear();
+        }
     }
 }

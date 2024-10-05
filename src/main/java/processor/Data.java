@@ -194,4 +194,14 @@ public class Data {
                 .flatMapToInt(Arrays::stream)
                 .toArray(), "img/img_without_code.png");
     }
+
+    public void clear() {
+        setTotalErrors(0);
+        setTotalNoCodingErrors(0);
+        setTotalBlocks(0);
+        setCurrentBlock(0);
+        setCurrentBitPosition(0);
+        getDecodedBlocks().clear();
+        getBlocksWithoutCode().clear();
+    }
 }
