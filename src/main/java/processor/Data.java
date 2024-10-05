@@ -99,6 +99,8 @@ public class Data {
         correctedBlock = encoderDecoder.decodeStepByStep(blockWithError, H, cosetLeaders);
         decodedBlock = Arrays.copyOf(correctedBlock, k);
         blockWithoutCode = Arrays.copyOf(blockWithoutCode, k);
+        totalFixed += getFixedCount();
+        totalNoCodingFixed += getNoCodingFixedCount();
         if (Data.getInstance().isDebugMode()) {
             System.out.println("\nBlock: " + Arrays.toString(block));
             System.out.println("Encoded block: " + Arrays.toString(encodedBlock));
@@ -107,8 +109,6 @@ public class Data {
             System.out.println("Decoded block: " + Arrays.toString(decodedBlock));
             System.out.println("Block without code: " + Arrays.toString(blockWithoutCode));
             System.out.println("Block without code error: " + Arrays.toString(blockWithoutCodeError));
-            totalFixed += getFixedCount();
-            totalNoCodingFixed += getNoCodingFixedCount();
             System.out.printf("Total errors: %d, Total fixed: %d, Total no coding errors: %d, Total no coding fixed: %d\n\n",
                     totalErrors, totalFixed, totalNoCodingErrors, totalNoCodingFixed);
         }

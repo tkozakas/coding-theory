@@ -1,13 +1,10 @@
 package ui;
 
 import processor.Data;
-import Experiment;
-
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class UserInterface {
-    private final Experiment experiment = new Experiment();
     private final Scanner scanner = new Scanner(System.in);
     private final Data data = Data.getInstance();
     private String inputType;
@@ -28,7 +25,6 @@ public class UserInterface {
                 case 4 -> changeProbability();
                 case 5 -> changeAlphabetSize();
                 case 6 -> toggleDebugMode();
-                case 7 -> experiment.run();
                 default -> System.out.println("Invalid choice. Please try again.");
             }
         }
@@ -53,7 +49,6 @@ public class UserInterface {
                 4. Change probability of error
                 5. Change number of symbols in the alphabet
                 6. Debug mode (currently %s)
-                7. Run experiments
                 Choice:\s""", data.isDebugMode() ? "ON" : "OFF");
     }
 
