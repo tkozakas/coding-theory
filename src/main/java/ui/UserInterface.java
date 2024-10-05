@@ -1,7 +1,7 @@
 package ui;
 
 import processor.Data;
-import processor.Experiment;
+import Experiment;
 
 import java.util.Arrays;
 import java.util.Scanner;
