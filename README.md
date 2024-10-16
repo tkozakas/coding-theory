@@ -7,18 +7,27 @@
 ```
 
 # Compile && Run
-### With UI
+### Compile
 ```bash
-    mvn clean compile 
+    mvn clean compile package
+```
+### Run
+```bash
+    # With UI
     mvn exec:java -Dexec.args="ui"
 ```
-### Without UI
 ```bash
-    mvn clean compile 
+    # Without UI
     mvn exec:java
 ```
 
-### Run .jar file
+### Using .jar file
 ```bash
-    java -jar ui.jar
+    # With UI
+    java --module-path javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml -jar target/coding-theory-1.0.jar ui
+```
+
+```bash
+    # Without UI
+    java -jar target/coding-theory-1.0.jar
 ```
