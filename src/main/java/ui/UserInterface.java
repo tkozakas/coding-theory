@@ -178,6 +178,7 @@ public class UserInterface {
             data.introduceErrors();
             data.decodeBlock();
         }
+        data.writeImage();
         System.out.println(inputType.equals("Image") ?
                 "Decoded image saved as img/img_decoded.png" :
                 "Decoded text: " + data.getDecodedString());
