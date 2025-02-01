@@ -29,5 +29,5 @@
 
 ```bash
     # Without UI
-    java -jar target/coding-theory-1.0-SNAPSHOT.jar
+    java --module-path javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml -jar target/coding-theory-1.0-SNAPSHOT.jar
 ```

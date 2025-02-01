@@ -1,14 +1,18 @@
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import ui.UserInterface;
 
 import java.io.IOException;
 
-public class Main extends Application {
+public class Main extends javafx.application.Application {
     public static void main(String[] args) {
-        launch(args);
+        if (args.length > 0 && args[0].equals("ui")) {
+            launch(args);
+        } else {
+            new UserInterface().start();
+        }
     }
 
     @Override
