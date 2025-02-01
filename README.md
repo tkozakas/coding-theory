@@ -9,7 +9,7 @@
 # Compile && Run
 ### Compile
 ```bash
-    mvn clean install
+    mvn clean compile package
 ```
 ### Run
 ```bash
@@ -24,10 +24,10 @@
 ### Using .jar file
 ```bash
     # With UI
-    java -jar target/coding-theory-1.0.jar ui
+    java --module-path javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml -jar target/coding-theory-1.0-SNAPSHOT.jar ui
 ```
 
 ```bash
     # Without UI
-    java -jar target/coding-theory-1.0.jar
+    java -jar target/coding-theory-1.0-SNAPSHOT.jar
 ```
