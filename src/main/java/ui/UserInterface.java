@@ -1,6 +1,7 @@
 package ui;
 
 import processor.Data;
+
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -178,10 +179,16 @@ public class UserInterface {
             data.introduceErrors();
             data.decodeBlock();
         }
-        data.writeImage();
-        System.out.println(inputType.equals("Image") ?
-                "Decoded image saved as img/img_decoded.png" :
-                "Decoded text: " + data.getDecodedString());
+        if (inputType.equals("Image")) {
+            data.writeImage();
+            System.out.println("Decoded image saved as img/img_decoded.png");
+        } else {
+            System.out.println("Decoded vector: " + Arrays.toString(data.getDecodedBlocks().stream()
+                    .flatMapToInt(Arrays::stream)
+                    .toArray()));
+            System.out.println("Decoded text (if have atleast 8 bits): " + data.getDecodedString());
+        }
+        data.clear();
     }
 
     private int getUserChoice() {

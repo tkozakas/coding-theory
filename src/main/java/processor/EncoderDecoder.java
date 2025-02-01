@@ -53,6 +53,9 @@ public class EncoderDecoder {
      * @return codeword with errors
      */
     public int[] introduceErrors(int[] c, double pe, int q) {
+        if (c == null || c.length == 0) {
+            throw new IllegalArgumentException("Invalid codeword: " + Arrays.toString(c));
+        }
         int[] r = Arrays.copyOf(c, c.length);
 
         if (debug) {

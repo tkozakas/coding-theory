@@ -39,7 +39,7 @@ public class Data {
     private int totalBlocks = 0;
 
     private Map<String, CosetLeader> cosetLeaders = new HashMap<>();
-    private boolean debugMode = false;
+    private boolean debugMode = true;
 
     private Processor processor = new Processor();
     private EncoderDecoder encoderDecoder = new EncoderDecoder();
@@ -109,8 +109,6 @@ public class Data {
             System.out.println("Decoded block: " + Arrays.toString(decodedBlock));
             System.out.println("Block without code: " + Arrays.toString(blockWithoutCode));
             System.out.println("Block without code error: " + Arrays.toString(blockWithoutCodeError));
-            System.out.printf("Total errors: %d, Total fixed: %d, Total no coding errors: %d, Total no coding fixed: %d\n\n",
-                    totalErrors, totalFixed, totalNoCodingErrors, totalNoCodingFixed);
         }
         decodedBlocks.add(decodedBlock);
         blocksWithoutCode.add(blockWithoutCodeError);
