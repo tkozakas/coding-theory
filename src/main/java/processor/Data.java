@@ -73,6 +73,9 @@ public class Data {
     }
 
     public void nextBlock() {
+        if (currentBitPosition >= inputBits.length) {
+            return;
+        }
         block = Arrays.copyOfRange(inputBits, currentBitPosition, Math.min(currentBitPosition + k, inputBits.length));
         currentBitPosition += k;
         currentBlock++;

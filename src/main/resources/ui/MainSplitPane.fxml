@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.VBox?>
-<SplitPane dividerPositions="0.5" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/22"
+<SplitPane dividerPositions="0.5" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/21"
            xmlns:fx="http://javafx.com/fxml/1">
     <VBox>
         <fx:include source="UserInterface.fxml"/>
