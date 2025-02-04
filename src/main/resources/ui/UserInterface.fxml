@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-<VBox xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="ui.FxUserInterface">
+<VBox xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="ui.FxUserInterface">
     <GridPane hgap="10" prefHeight="78.0" prefWidth="534.0" vgap="10">
         <padding>
             <Insets bottom="10" left="10" right="10" top="10" />
@@ -140,24 +140,7 @@
         <Label style="-fx-font-weight: bold;" text="Decoding / Without Coding" GridPane.columnIndex="1" GridPane.rowIndex="4" />
       <Button onAction="#processInput" prefWidth="120" text="Process" GridPane.columnIndex="2" />
       <Button onAction="#clearInput" prefWidth="120.0" text="Clear" GridPane.columnIndex="2" GridPane.rowIndex="14" />
-        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="13">
-            <Label style="-fx-font-weight: bold;" text="Fixed:" />
-            <Label style="-fx-font-weight: bold;" text="Fixed Positions:">
-                <padding>
-                    <Insets top="10.0" />
-                </padding>
-            </Label>
-        </VBox>
-        <SplitPane dividerPositions="0.5" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="13">
-            <VBox prefHeight="200.0" prefWidth="100.0">
-                <TextField fx:id="fixedCountTextFiled" promptText="Fixed Count" />
-                <TextField fx:id="fixedPositionTextField" promptText="Fixed Positions" />
-            </VBox>
-            <VBox prefHeight="200.0" prefWidth="100.0">
-                <TextField fx:id="noCodingFixedCountTextField" promptText="Fixed Count" />
-                <TextField fx:id="noCodingFixedPositionTextField" promptText="Fixed Positions" />
-            </VBox>
-        </SplitPane>
+        <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="13"/>
       <Label style="-fx-font-weight: bold;" text="Blocks Decoded:" GridPane.rowIndex="11" />
         <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="11">
             <TextField fx:id="blocksDecodedTextField" promptText="Decoded Blocks"/>

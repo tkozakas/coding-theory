@@ -1,7 +1,5 @@
 package ui;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import processor.Data;
 
 import java.util.Arrays;
@@ -175,38 +173,23 @@ public class UserInterface {
     }
 
     private void processInputBlocks() {
-        Task<Void> backgroundTask = new Task<>() {
-            @Override
-            protected Void call() {
-                while (data.getCurrentBitPosition() < data.getInputBits().length) {
-                    data.nextBlock();
-                    data.encodeBlock();
-                    data.introduceErrors();
-                    data.decodeBlock();
-                }
-
-                String decodedText = String.valueOf(data.getDecodedString());
-                String decodedVector = Arrays.toString(data.getDecodedBlocks().stream()
-                        .flatMapToInt(Arrays::stream)
-                        .toArray());
-
-                Platform.runLater(() -> {
-                    if (inputType.equals("Image")) {
-                        data.writeImage();
-                        System.out.println("Decoded image saved as img/img_decoded.png");
-                    } else {
-                        System.out.println("Decoded vector: " + decodedVector);
-                        System.out.println("Decoded text (if have at least 8 bits): " + decodedText);
-                    }
-                });
-
-                data.clear();
-                return null;
-            }
-        };
-        new Thread(backgroundTask).start();
+        while (data.getCurrentBitPosition() < data.getInputBits().length) {
+            data.nextBlock();
+            data.encodeBlock();
+            data.introduceErrors();
+            data.decodeBlock();
+        }
+        if (inputType.equals("Image")) {
+            data.writeImage();
+            System.out.println("Decoded image saved as img/img_decoded.png");
+        } else {
+            System.out.println("Decoded vector: " + Arrays.toString(data.getDecodedBlocks().stream()
+                    .flatMapToInt(Arrays::stream)
+                    .toArray()));
+            System.out.println("Decoded text (if have atleast 8 bits): " + data.getDecodedString());
+        }
+        data.clear();
     }
-
 
     private int getUserChoice() {
         while (!scanner.hasNextInt()) {

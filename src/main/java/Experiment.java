@@ -49,10 +49,10 @@ public class Experiment {
             data.getBlockWithError()[position] = data.getBlockWithError()[position] == 0 ? 1 : 0;
         }
 
-        data.setBlockWithoutCodeError(data.getBlockWithoutCode().clone());
+        data.setBlockWithoutCodeAndError(data.getBlockWithoutCode().clone());
         for (int i = 0; i < mistakes; i++) {
-            int position = random.nextInt(data.getBlockWithoutCodeError().length);
-            data.getBlockWithoutCodeError()[position] = data.getBlockWithoutCodeError()[position] == 0 ? 1 : 0;
+            int position = random.nextInt(data.getBlockWithoutCodeAndError().length);
+            data.getBlockWithoutCodeAndError()[position] = data.getBlockWithoutCodeAndError()[position] == 0 ? 1 : 0;
         }
         data.setTotalErrors(mistakes);
         data.setTotalNoCodingErrors(mistakes);

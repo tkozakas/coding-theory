@@ -13,21 +13,10 @@
 ```
 ### Run
 ```bash
-    # With UI
-    mvn exec:java -Dexec.args="ui"
-```
-```bash
-    # Without UI
     mvn exec:java
 ```
 
-### Using .jar file
+### Run .jar
 ```bash
-    # With UI
-    java --module-path javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml -jar target/coding-theory-1.0-SNAPSHOT.jar ui
-```
-
-```bash
-    # Without UI
-    java --module-path javafx-sdk-21/lib --add-modules javafx.controls,javafx.fxml -jar target/coding-theory-1.0-SNAPSHOT.jar
+    java -jar target/coding-theory-1.0-SNAPSHOT.jar
 ```

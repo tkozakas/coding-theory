@@ -4,6 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 import model.CosetLeader;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -24,7 +28,7 @@ public class Data {
     private int[] blockWithoutCode;
     private int[] encodedBlock;
     private int[] blockWithError;
-    private int[] blockWithoutCodeError;
+    private int[] blockWithoutCodeAndError;
     private int[] correctedBlock;
     private int[] decodedBlock;
     private int[] inputBits;
@@ -93,7 +97,7 @@ public class Data {
 
     public void introduceErrors() {
         blockWithError = encoderDecoder.introduceErrors(encodedBlock, pe, q);
-        blockWithoutCodeError = encoderDecoder.introduceErrors(blockWithoutCode, pe, q);
+        blockWithoutCodeAndError = encoderDecoder.introduceErrors(blockWithoutCode, pe, q);
         totalErrors += getErrorCount();
         totalNoCodingErrors += getNoCodingErrorCount();
     }
@@ -111,10 +115,10 @@ public class Data {
             System.out.println("Corrected block: " + Arrays.toString(correctedBlock));
             System.out.println("Decoded block: " + Arrays.toString(decodedBlock));
             System.out.println("Block without code: " + Arrays.toString(blockWithoutCode));
-            System.out.println("Block without code error: " + Arrays.toString(blockWithoutCodeError));
+            System.out.println("Block without code and error: " + Arrays.toString(blockWithoutCodeAndError));
         }
         decodedBlocks.add(decodedBlock);
-        blocksWithoutCode.add(blockWithoutCodeError);
+        blocksWithoutCode.add(blockWithoutCodeAndError);
     }
 
     public int getErrorCount() {
@@ -126,11 +130,11 @@ public class Data {
     }
 
     public int[] getNoCodingErrorPositions() {
-        return getErrorPositions(blockWithoutCodeError, blockWithoutCode);
+        return getErrorPositions(blockWithoutCodeAndError, blockWithoutCode);
     }
 
     public int getNoCodingErrorCount() {
-        return getErrorCount(blockWithoutCodeError, blockWithoutCode);
+        return getErrorCount(blockWithoutCodeAndError, blockWithoutCode);
     }
 
     public StringBuilder getDecodedString() {
@@ -150,11 +154,11 @@ public class Data {
     }
 
     public int getNoCodingFixedCount() {
-        return getFixedCount(blockWithoutCodeError, block, getNoCodingErrorPositions());
+        return getFixedCount(blockWithoutCodeAndError, block, getNoCodingErrorPositions());
     }
 
     public int[] getNoCodingFixedPositions() {
-        return getFixedPositions(blockWithoutCodeError, block, getNoCodingErrorPositions());
+        return getFixedPositions(blockWithoutCodeAndError, block, getNoCodingErrorPositions());
     }
 
     private int getErrorCount(int[] array1, int[] array2) {
@@ -188,13 +192,40 @@ public class Data {
     }
 
     public void writeImage() {
-        processor.writeImage(decodedBlocks.stream()
-                .flatMapToInt(Arrays::stream)
-                .toArray(), "img/img_decoded.png");
-        processor.writeImage(blocksWithoutCode.stream()
-                .flatMapToInt(Arrays::stream)
-                .toArray(), "img/img_without_code.png");
+        try {
+            File dir = new File("img");
+            if (!dir.exists()) {
+                boolean created = dir.mkdirs();
+                if (!created) {
+                    throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
+                }
+            }
+
+            int[] decodedImageArray = decodedBlocks.stream()
+                    .flatMapToInt(Arrays::stream)
+                    .toArray();
+            String decodedImagePath = "img/img_decoded.png";
+            processor.writeImage(decodedImageArray, decodedImagePath);
+            verifyFileExists(decodedImagePath);
+
+            int[] withoutCodeImageArray = blocksWithoutCode.stream()
+                    .flatMapToInt(Arrays::stream)
+                    .toArray();
+            String withoutCodeImagePath = "img/img_without_code.png";
+            processor.writeImage(withoutCodeImageArray, withoutCodeImagePath);
+            verifyFileExists(withoutCodeImagePath);
+
+        } catch (Exception e) {
+            System.err.println("Failed to write images: " + e.getMessage());
+        }
     }
+
+    private void verifyFileExists(String path) throws IOException {
+        if (!Files.exists(Paths.get(path))) {
+            throw new IOException("File was not created: " + path);
+        }
+    }
+
 
     public void clear() {
         setTotalErrors(0);

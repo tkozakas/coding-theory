@@ -28,10 +28,6 @@ public class FxUserInterface {
     public TextField errorPositionTextField;
     public TextField noCodingErrorCountTextField;
     public TextField noCodingErrorPositionTextField;
-    public TextField fixedCountTextFiled;
-    public TextField fixedPositionTextField;
-    public TextField noCodingFixedCountTextField;
-    public TextField noCodingFixedPositionTextField;
     public TextField blocksDecodedTextField;
     public TextField withoutCodingBlocksDecodedTextField;
 
@@ -65,7 +61,7 @@ public class FxUserInterface {
         if (newValue.isBlank()) {
             return;
         }
-        data.setBlockWithoutCodeError(parseStringToBits(newValue));
+        data.setBlockWithoutCodeAndError(parseStringToBits(newValue));
     }
 
     private void updateWithErrorBlock(String newValue) {
@@ -132,7 +128,7 @@ public class FxUserInterface {
     public void sendEncodedBlock() {
         data.introduceErrors();
         withErrorTextField.setText(Arrays.toString(data.getBlockWithError()));
-        withoutCodeErrorTextField.setText(Arrays.toString(data.getBlockWithoutCodeError()));
+        withoutCodeErrorTextField.setText(Arrays.toString(data.getBlockWithoutCodeAndError()));
         errorCountTextField.setText(String.valueOf(data.getErrorCount()));
         errorPositionTextField.setText(Arrays.toString(data.getErrorPositions()));
         noCodingErrorCountTextField.setText(String.valueOf(data.getNoCodingErrorCount()));
@@ -142,7 +138,7 @@ public class FxUserInterface {
     @FXML
     public void decodeBlock() {
         data.setBlockWithError(parseStringToBits(withErrorTextField.getText()));
-        data.setBlockWithoutCodeError(parseStringToBits(withoutCodeErrorTextField.getText()));
+        data.setBlockWithoutCodeAndError(parseStringToBits(withoutCodeErrorTextField.getText()));
         errorCountTextField.setText(String.valueOf(data.getErrorCount()));
         errorPositionTextField.setText(Arrays.toString(data.getErrorPositions()));
         noCodingErrorCountTextField.setText(String.valueOf(data.getNoCodingErrorCount()));
@@ -153,10 +149,6 @@ public class FxUserInterface {
         decodedBlockTextField.setText(Arrays.toString(data.getDecodedBlock()));
         decodedTextField.setText(String.valueOf(data.getDecodedString()));
         withoutCodingTextField.setText(String.valueOf(data.getWithoutCodingString()));
-        fixedCountTextFiled.setText(String.valueOf(data.getFixedCount()));
-        fixedPositionTextField.setText(Arrays.toString(data.getFixedPositions()));
-        noCodingFixedCountTextField.setText(String.valueOf(data.getNoCodingFixedCount()));
-        noCodingFixedPositionTextField.setText(Arrays.toString(data.getNoCodingFixedPositions()));
         blocksDecodedTextField.setText(Arrays.toString(data.getDecodedBlocks().stream()
                 .flatMapToInt(Arrays::stream)
                 .toArray()));
@@ -209,8 +201,7 @@ public class FxUserInterface {
                 currentBlockTextField, encodedBlockTextField, withErrorTextField, correctedBlockTextField, decodedBlockTextField,
                 withoutCodeErrorTextField, decodedTextField, withoutCodingTextField, errorCountTextField,
                 errorPositionTextField, noCodingErrorCountTextField, noCodingErrorPositionTextField,
-                fixedCountTextFiled, fixedPositionTextField, noCodingFixedCountTextField,
-                noCodingFixedPositionTextField, blocksDecodedTextField, withoutCodingBlocksDecodedTextField
+                blocksDecodedTextField, withoutCodingBlocksDecodedTextField
         );
         data.clear();
     }
