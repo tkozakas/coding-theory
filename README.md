@@ -16,7 +16,13 @@
     mvn exec:java
 ```
 
-### Run .jar
+### Run .jar with UI
 ```bash
-    java -jar target/coding-theory-1.0-SNAPSHOT.jar
+    java -jar target/coding-theory-1.0.jar ui
+```
+
+### Run .jar without UI
+
+```bash
+    java -jar target/coding-theory-1.0.jar   
 ```
